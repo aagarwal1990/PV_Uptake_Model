@@ -1,0 +1,39 @@
+version: 1
+
+formatters:
+    simpleFormatter:
+        format: '%(asctime)s - %(name)s - %(levelname)s: %(message)s'
+        datefmt: '%Y/%m/%d %H:%M:%S'
+
+handlers:
+    customerFh:
+        class: logging.FileHandler
+        formatter: simpleFormatter
+        level: DEBUG
+        filename: customer.log
+    utilityFh :
+        class : logging.FileHandler
+        formatter: simpleFormatter
+        level: DEBUG
+        filename: utility.log
+    errorFh :
+        class : logging.FileHandler
+        formatter: simpleFormatter
+        level: WARNING
+        filename: error.log
+
+loggers:
+    customerLogger:
+        level: DEBUG
+        handlers: [customerFh] 
+    utilityLogger:
+        level: DEBUG
+        handlers: [utilityFh]
+    errorLogger:
+        level: WARNING
+        handlers: [errorFh]
+        
+root:
+    level: DEBUG
+    handlers: []
+    
