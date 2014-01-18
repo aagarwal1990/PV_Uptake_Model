@@ -305,8 +305,8 @@ class ResidentialCustomerCategory(Agent):
 		consumption_category = self.parameter_dictionary['customer_category_name']
 		consumption_bin = float(self.get_middle_text(consumption_category, 'Consumption:Bin', '<'))
 		(technology, savings, original_net_present_value_of_utility_bill) = self.parameter_dictionary['pv_installer'].get_recommended_quantity_at_time_index(index_of_current_time, load_profile, baseline_allocation, rate_schedule, consumption_bin, self.parameter_dictionary)
-		if consumption_bin == 6.0:
-		    print savings, rate_schedule.get_name()
+# 		if consumption_bin == 5.0:
+# 		    print savings, rate_schedule.get_name(), original_net_present_value_of_utility_bill, index_of_current_time
 		if savings > 0:
 #                     print self.parameter_dictionary['customer_category_name']
 #                     print consumption_bin
@@ -327,9 +327,10 @@ class ResidentialCustomerCategory(Agent):
                         probability = (P_fit + (Q_fit) * (float(current_number_of_adopters + 100*400) / (4.2 * math.pow(10, 6) * 0.3)))
                     
                     if self.parameter_dictionary['model_type'].lower() == 'Bass Model With Savings'.lower():
-                        probability = (P_fit + (Q_fit) * (float(current_number_of_adopters + 100*400) / (4.2 * math.pow(10, 6) * 0.3))) * ((B_fit * savings) / math.sqrt(1 + math.pow(B_fit * savings, 2)))
-                         
+                        probability = (P_fit + (Q_fit) * (float(current_number_of_adopters + 100*400) / (4.2 * math.pow(10, 6) * 0.3))) * ((B_fit * savings) / math.sqrt(1 + math.pow(B_fit * savings, 2)))   
                     number_of_adopters = round(probability * self.parameter_dictionary['pv_dictionary'][None])
+                    if consumption_bin == 5.0:
+                        print probability, number_of_adopters, rate_schedule.get_name(), index_of_current_time
 #                     print str(probability) + " " + str(number_of_adopters) + "\n"
                     self.parameter_dictionary['pv_dictionary'][technology] += number_of_adopters
                     self.parameter_dictionary['pv_dictionary'][None] -= number_of_adopters

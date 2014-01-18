@@ -283,8 +283,8 @@ if tariff_structure_dct['number_of_tiers'] == "Ratio":
 else:
     rate_update_rules_dictionary['ratio_flag'] = 0
     
-rate_update_rules_dictionary['T1_increase'] = tariff_structure_dct['T1_increase']
-rate_update_rules_dictionary['T2_increase'] = tariff_structure_dct['T2_increase']
+rate_update_rules_dictionary['T1_increase'] = tariff_structure_dct['T1_increase'] + 1
+rate_update_rules_dictionary['T2_increase'] = tariff_structure_dct['T2_increase'] + 1
 rate_update_rules_dictionary['T4_T3_delta'] = tariff_structure_dct['T4-T3_delta']
 rate_update_rules_dictionary['T5_T4_delta'] = tariff_structure_dct['T5-T4_delta']
 
@@ -298,7 +298,7 @@ rate_update_rules_dictionary['T2_CARE_discount'] = 1 - tariff_structure_dct['T2_
 rate_update_rules_dictionary['T3_CARE_discount'] = 1 - tariff_structure_dct['T3_energy_CARE_discount']
 rate_update_rules_dictionary['T4_CARE_discount'] = 1 - tariff_structure_dct['T4_energy_CARE_discount']
 rate_update_rules_dictionary['T5_CARE_discount'] = 1 - tariff_structure_dct['T5_energy_CARE_discount']
-rate_update_rules_dictionary['fixed_charge_CARE_discount'] = 1 - tariff_structure_dct['fixed_charge_CARE_discount']
+rate_update_rules_dictionary['fixed_charge_CARE_discount'] = tariff_structure_dct['fixed_charge_CARE_discount']
 
 rate_specs = {}
 rate_specs['type'] = 'TierNetMeterRateSchedule'
@@ -337,8 +337,8 @@ if tariff_structure_dct['number_of_tiers'] == "Ratio":
 else:
     rate_update_rules_dictionary['ratio_flag'] = 0
     
-rate_update_rules_dictionary['T1_increase'] = tariff_structure_dct['T1_increase']
-rate_update_rules_dictionary['T2_increase'] = tariff_structure_dct['T2_increase']
+rate_update_rules_dictionary['T1_increase'] = tariff_structure_dct['T1_increase'] + 1
+rate_update_rules_dictionary['T2_increase'] = tariff_structure_dct['T2_increase'] + 1
 rate_update_rules_dictionary['T4_T3_delta'] = tariff_structure_dct['T4-T3_delta']
 rate_update_rules_dictionary['T5_T4_delta'] = tariff_structure_dct['T5-T4_delta']
 
@@ -352,7 +352,7 @@ rate_update_rules_dictionary['T2_CARE_discount'] = 1 - tariff_structure_dct['T2_
 rate_update_rules_dictionary['T3_CARE_discount'] = 1 - tariff_structure_dct['T3_energy_CARE_discount']
 rate_update_rules_dictionary['T4_CARE_discount'] = 1 - tariff_structure_dct['T4_energy_CARE_discount']
 rate_update_rules_dictionary['T5_CARE_discount'] = 1 - tariff_structure_dct['T5_energy_CARE_discount']
-rate_update_rules_dictionary['fixed_charge_CARE_discount'] = 1 - tariff_structure_dct['fixed_charge_CARE_discount']
+rate_update_rules_dictionary['fixed_charge_CARE_discount'] = tariff_structure_dct['fixed_charge_CARE_discount']
 
 rate_specs = {}
 rate_specs['type'] = 'TierNetMeterRateSchedule'
@@ -362,11 +362,11 @@ rate_specs['rate_update_rules_dictionary'] = rate_update_rules_dictionary
 
 rate_schedule_dictionary['rate_schedule_2'] = {}
 rate_schedule_dictionary['rate_schedule_2']['specs'] = rate_specs
-# for k, v in rate_schedule_dictionary.iteritems():
-#     print k
-#     for k1, v1 in v['specs']['rate_component_dictionary'].iteritems():
-#         print k1, v1
-#     print '\n'
+for k, v in rate_schedule_dictionary.iteritems():
+    print k
+    for k1, v1 in v['specs']['rate_update_rules_dictionary'].iteritems():
+        print k1, v1
+    print '\n'
 specs.append({'rate_schedule_dictionary': rate_schedule_dictionary})
 
 # define utility
@@ -382,7 +382,11 @@ util_specs['parameter_dictionary'] = util_parameter_dictionary
 
 utility_dictionary['utility_1'] = {}
 utility_dictionary['utility_1']['specs'] = util_specs
-
+for k, v in utility_dictionary.iteritems():
+    print k
+    for k1, v1 in v['specs']['parameter_dictionary'].iteritems():
+        print k1, v1
+    print '\n'
 specs.append({'utility_dictionary': utility_dictionary})
 
 # define residential customer categories
