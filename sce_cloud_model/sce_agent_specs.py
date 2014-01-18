@@ -305,6 +305,8 @@ class ResidentialCustomerCategory(Agent):
 		consumption_category = self.parameter_dictionary['customer_category_name']
 		consumption_bin = float(self.get_middle_text(consumption_category, 'Consumption:Bin', '<'))
 		(technology, savings, original_net_present_value_of_utility_bill) = self.parameter_dictionary['pv_installer'].get_recommended_quantity_at_time_index(index_of_current_time, load_profile, baseline_allocation, rate_schedule, consumption_bin, self.parameter_dictionary)
+		if consumption_bin == 6.0:
+		    print savings, rate_schedule.get_name()
 		if savings > 0:
 #                     print self.parameter_dictionary['customer_category_name']
 #                     print consumption_bin
@@ -316,7 +318,8 @@ class ResidentialCustomerCategory(Agent):
 
                     if self.parameter_dictionary['model_type'].lower() == 'Classic Bass Model With Savings'.lower():
                         savingsBin = self.get_savings_bin(savings)
-#                         print savingsBin
+#                         if consumption_bin == 5:
+#                             print savingsBin
                         P_fit, Q_fit = self.get_P_Q_vals(savingsBin)
                         probability = (P_fit + (Q_fit) * (float(current_number_of_adopters + 100*400) / (4.2 * math.pow(10, 6) * 0.3)))
                         

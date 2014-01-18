@@ -9,7 +9,7 @@ def get_middle_text(line, string_start, string_end):
 
 specs = []
 
-workbook = xlrd.open_workbook('ExcelMockup_v6.xlsm')
+workbook = xlrd.open_workbook('ExcelMockup_AccurateValues.xlsm')
 adoption_model = workbook.sheet_by_name('Climates, Rates, Adoption Model')
 consumption_categories = workbook.sheet_by_name('Category_Names')
 pv_parameters = workbook.sheet_by_name('PV Parameters')
@@ -152,7 +152,7 @@ utility_costs_dct['total_system_delivery_costs'] = float(utility_costs.cell_valu
 # initialize technology installer dictionary    
 tech_installer_parameter_dictionary = {}
 tech_installer_parameter_dictionary['kw_per_panel'] = 1
-tech_installer_parameter_dictionary['minimum_number_of_panels'] = 1
+tech_installer_parameter_dictionary['minimum_number_of_panels'] = 3
 tech_installer_parameter_dictionary['maximum_number_of_panels'] = 10
 tech_installer_parameter_dictionary['conversion_factor'] = 1 
 tech_installer_parameter_dictionary['efficiency'] = {}
@@ -179,7 +179,6 @@ tech_parameter_dictionary = {}
 tech_parameter_dictionary['conversion_factor'] = 1
 tech_parameter_dictionary['quantity_min'] = 1
 tech_parameter_dictionary['quantity_max'] = 10
-tech_parameter_dictionary['conversion_factor'] = 1
 
 tech_specs = {}
 tech_specs['type'] = 'PvTechnology'
@@ -324,11 +323,11 @@ rate_component_dictionary['T2_usage_baseline'] = tariff_structure_dct['T2/Baseli
 rate_component_dictionary['T3_usage_baseline'] = tariff_structure_dct['T3/Baseline']
 rate_component_dictionary['T4_usage_baseline'] = tariff_structure_dct['T4/Baseline']
 rate_component_dictionary['T5_usage_baseline'] = tariff_structure_dct['T5/Baseline']
-rate_component_dictionary['T1_rate'] = tariff_structure_dct['T1_rate']
-rate_component_dictionary['T2_rate'] = tariff_structure_dct['T2_rate']
-rate_component_dictionary['T3_rate'] = tariff_structure_dct['T3_rate']
-rate_component_dictionary['T4_rate'] = tariff_structure_dct['T4_rate']
-rate_component_dictionary['T5_rate'] = tariff_structure_dct['T5_rate']
+rate_component_dictionary['T1_rate'] = 0.10
+rate_component_dictionary['T2_rate'] = 0.13
+rate_component_dictionary['T3_rate'] = 0.22
+rate_component_dictionary['T4_rate'] = 0.22
+rate_component_dictionary['T5_rate'] = 0.22
 rate_component_dictionary['net_surplus_compensation_rate'] = tariff_structure_dct['net_surplus_compensation_rate']
 
 rate_update_rules_dictionary = {}
@@ -363,7 +362,11 @@ rate_specs['rate_update_rules_dictionary'] = rate_update_rules_dictionary
 
 rate_schedule_dictionary['rate_schedule_2'] = {}
 rate_schedule_dictionary['rate_schedule_2']['specs'] = rate_specs
-
+# for k, v in rate_schedule_dictionary.iteritems():
+#     print k
+#     for k1, v1 in v['specs']['rate_component_dictionary'].iteritems():
+#         print k1, v1
+#     print '\n'
 specs.append({'rate_schedule_dictionary': rate_schedule_dictionary})
 
 # define utility

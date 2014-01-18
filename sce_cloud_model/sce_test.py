@@ -446,7 +446,7 @@ class TestAgents(unittest.TestCase):
         print '\n-----------------------------------------------------'
         print 'TESTING Main Simulation...\n'
 #         self.simulator.execute(time_horizon = 24)
-        simulation_dct['test_ID'] = self.test_parser.simulator.execute(time_horizon = 24)
+        simulation_dct['test_ID'] = self.test_parser.simulator.execute(time_horizon = 36)
         print '\nFINISHED TESTING Main Simulation...'
         print '-----------------------------------------------------\n'
 #         acc = self.utility.get_customer_category_account('Customer_0000')

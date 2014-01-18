@@ -32,7 +32,7 @@ class specparser(object):
 #           try:
                 SimulatorClock('clock', self.simulator)
                 specs = sce_generate_yaml_dct.specs
-                                
+                                                
                 # parse yaml file and create dictionaries for each type of object
                 for index, dct in enumerate(specs):
                         # append all technology installers to self.technology_installer_dictionary
