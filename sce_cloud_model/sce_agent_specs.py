@@ -318,8 +318,6 @@ class ResidentialCustomerCategory(Agent):
 
                     if self.parameter_dictionary['model_type'].lower() == 'Classic Bass Model With Savings'.lower():
                         savingsBin = self.get_savings_bin(savings)
-#                         if consumption_bin == 5:
-#                             print savingsBin
                         P_fit, Q_fit = self.get_P_Q_vals(savingsBin)
                         probability = (P_fit + (Q_fit) * (float(current_number_of_adopters + 100*400) / (4.2 * math.pow(10, 6) * 0.3)))
                         
@@ -329,8 +327,8 @@ class ResidentialCustomerCategory(Agent):
                     if self.parameter_dictionary['model_type'].lower() == 'Bass Model With Savings'.lower():
                         probability = (P_fit + (Q_fit) * (float(current_number_of_adopters + 100*400) / (4.2 * math.pow(10, 6) * 0.3))) * ((B_fit * savings) / math.sqrt(1 + math.pow(B_fit * savings, 2)))   
                     number_of_adopters = round(probability * self.parameter_dictionary['pv_dictionary'][None])
-                    if consumption_bin == 5.0:
-                        print probability, number_of_adopters, rate_schedule.get_name(), index_of_current_time
+#                     if consumption_bin == 5.0:
+#                         print probability, number_of_adopters, rate_schedule.get_name(), index_of_current_time
 #                     print str(probability) + " " + str(number_of_adopters) + "\n"
                     self.parameter_dictionary['pv_dictionary'][technology] += number_of_adopters
                     self.parameter_dictionary['pv_dictionary'][None] -= number_of_adopters

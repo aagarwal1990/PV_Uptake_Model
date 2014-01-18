@@ -362,11 +362,11 @@ rate_specs['rate_update_rules_dictionary'] = rate_update_rules_dictionary
 
 rate_schedule_dictionary['rate_schedule_2'] = {}
 rate_schedule_dictionary['rate_schedule_2']['specs'] = rate_specs
-for k, v in rate_schedule_dictionary.iteritems():
-    print k
-    for k1, v1 in v['specs']['rate_update_rules_dictionary'].iteritems():
-        print k1, v1
-    print '\n'
+# for k, v in rate_schedule_dictionary.iteritems():
+#     print k
+#     for k1, v1 in v['specs']['rate_component_dictionary'].iteritems():
+#         print k1, v1
+#     print '\n'
 specs.append({'rate_schedule_dictionary': rate_schedule_dictionary})
 
 # define utility
@@ -382,11 +382,11 @@ util_specs['parameter_dictionary'] = util_parameter_dictionary
 
 utility_dictionary['utility_1'] = {}
 utility_dictionary['utility_1']['specs'] = util_specs
-for k, v in utility_dictionary.iteritems():
-    print k
-    for k1, v1 in v['specs']['parameter_dictionary'].iteritems():
-        print k1, v1
-    print '\n'
+# for k, v in utility_dictionary.iteritems():
+#     print k
+#     for k1, v1 in v['specs']['parameter_dictionary'].iteritems():
+#         print k1, v1
+#     print '\n'
 specs.append({'utility_dictionary': utility_dictionary})
 
 # define residential customer categories
