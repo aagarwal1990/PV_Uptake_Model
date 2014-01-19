@@ -10,11 +10,11 @@ def get_middle_text(line, string_start, string_end):
 specs = []
 
 workbook = xlrd.open_workbook('ExcelMockup_AccurateValues.xlsm')
-adoption_model = workbook.sheet_by_name('Climates, Rates, Adoption Model')
+adoption_model = workbook.sheet_by_name('Adoption_Model')
 consumption_categories = workbook.sheet_by_name('Category_Names')
-pv_parameters = workbook.sheet_by_name('PV Parameters')
-tariff_structures = workbook.sheet_by_name('Tariff Structures')
-utility_costs = workbook.sheet_by_name('Utility Costs')
+pv_parameters = workbook.sheet_by_name('PV_Parameters')
+tariff_structures = workbook.sheet_by_name('Executive_Summary')
+utility_costs = workbook.sheet_by_name('Utility_Costs')
 
 """ generate_yaml_dct """
 yaml_dct = {}
@@ -39,7 +39,7 @@ while adoption_model.cell_value(rate_row, rate_col) is not '':
 # Get Model Type and parameters
 adoption_model_dct = {}
 model_row = 8
-model_col = 4
+model_col = 3
 adoption_model_dct['model_type'] = adoption_model.cell_value(model_row, model_col)
 adoption_model_dct['model_type_pClassic'] = float(adoption_model.cell_value(model_row, model_col + 1))
 adoption_model_dct['model_type_qClassic'] = float(adoption_model.cell_value(model_row, model_col + 2))
@@ -83,7 +83,7 @@ for pv_col in range(pv_col, pv_parameters.ncols):
     annual_price_lst = [pv_price] * 12
     pv_parameters_dct['pv_prices_lst'].extend(annual_price_lst)
     pv_col += 1
-pv_parameters_dct['power_production'] =  int(pv_parameters.cell_value(5, 0))
+pv_parameters_dct['power_production'] =  int(pv_parameters.cell_value(8, 0))
 
 """ Parse Tariff Structures Worksheet """
 tariff_structure_dct = {}
