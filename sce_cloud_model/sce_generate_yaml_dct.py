@@ -38,17 +38,18 @@ while adoption_model.cell_value(rate_row, rate_col) is not '':
 
 # Get Model Type and parameters
 adoption_model_dct = {}
-model_row = 30
-adoption_model_dct['model_type'] = adoption_model.cell_value(model_row, 2)
-adoption_model_dct['model_type_pClassic'] = float(adoption_model.cell_value(model_row, 3))
-adoption_model_dct['model_type_qClassic'] = float(adoption_model.cell_value(model_row, 4))
-adoption_model_dct['model_type_bClassic'] = float(adoption_model.cell_value(model_row, 5))
-adoption_model_dct['model_type_p_bin_1'] = float(adoption_model.cell_value(model_row, 6))
-adoption_model_dct['model_type_q_bin_1'] = float(adoption_model.cell_value(model_row, 7))
-adoption_model_dct['model_type_p_bin_2'] = float(adoption_model.cell_value(model_row, 8))
-adoption_model_dct['model_type_q_bin_2'] = float(adoption_model.cell_value(model_row, 9))
-adoption_model_dct['model_type_p_bin_3'] = float(adoption_model.cell_value(model_row, 10))
-adoption_model_dct['model_type_q_bin_3'] = float(adoption_model.cell_value(model_row, 11))
+model_row = 8
+model_col = 4
+adoption_model_dct['model_type'] = adoption_model.cell_value(model_row, model_col)
+adoption_model_dct['model_type_pClassic'] = float(adoption_model.cell_value(model_row, model_col + 1))
+adoption_model_dct['model_type_qClassic'] = float(adoption_model.cell_value(model_row, model_col + 2))
+adoption_model_dct['model_type_bClassic'] = float(adoption_model.cell_value(model_row, model_col + 3))
+adoption_model_dct['model_type_p_bin_1'] = float(adoption_model.cell_value(model_row, model_col + 4))
+adoption_model_dct['model_type_q_bin_1'] = float(adoption_model.cell_value(model_row, model_col + 5))
+adoption_model_dct['model_type_p_bin_2'] = float(adoption_model.cell_value(model_row, model_col + 6))
+adoption_model_dct['model_type_q_bin_2'] = float(adoption_model.cell_value(model_row, model_col + 7))
+adoption_model_dct['model_type_p_bin_3'] = float(adoption_model.cell_value(model_row, model_col + 8))
+adoption_model_dct['model_type_q_bin_3'] = float(adoption_model.cell_value(model_row, model_col + 9))
 
 """ Parse Consumption Categories Worksheet """
 customer_categories_dct = {}
