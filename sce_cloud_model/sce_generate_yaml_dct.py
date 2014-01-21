@@ -324,11 +324,11 @@ rate_component_dictionary['T2_usage_baseline'] = tariff_structure_dct['T2/Baseli
 rate_component_dictionary['T3_usage_baseline'] = tariff_structure_dct['T3/Baseline']
 rate_component_dictionary['T4_usage_baseline'] = tariff_structure_dct['T4/Baseline']
 rate_component_dictionary['T5_usage_baseline'] = tariff_structure_dct['T5/Baseline']
-rate_component_dictionary['T1_rate'] = 0.10
-rate_component_dictionary['T2_rate'] = 0.13
-rate_component_dictionary['T3_rate'] = 0.22
-rate_component_dictionary['T4_rate'] = 0.22
-rate_component_dictionary['T5_rate'] = 0.22
+rate_component_dictionary['T1_rate'] = tariff_structure_dct['T1_rate'] * (1 - tariff_structure_dct['T1_energy_CARE_discount'])
+rate_component_dictionary['T2_rate'] = tariff_structure_dct['T2_rate'] * (1 - tariff_structure_dct['T2_energy_CARE_discount'])
+rate_component_dictionary['T3_rate'] = tariff_structure_dct['T3_rate'] * (1 - tariff_structure_dct['T3_energy_CARE_discount'])
+rate_component_dictionary['T4_rate'] = tariff_structure_dct['T3_rate'] * (1 - tariff_structure_dct['T4_energy_CARE_discount'])
+rate_component_dictionary['T5_rate'] = tariff_structure_dct['T3_rate'] * (1 - tariff_structure_dct['T5_energy_CARE_discount'])
 rate_component_dictionary['net_surplus_compensation_rate'] = tariff_structure_dct['net_surplus_compensation_rate']
 
 rate_update_rules_dictionary = {}

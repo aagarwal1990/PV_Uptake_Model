@@ -28,7 +28,7 @@ class TestAgents(unittest.TestCase):
     def test_agents(self):
         print '\n-----------------------------------------------------'
         print 'TESTING Main Simulation...\n'
-        simulation_dct['test_ID'] = self.test_parser.simulator.execute(time_horizon = 60)
+        simulation_dct['test_ID'] = self.test_parser.simulator.execute(time_horizon = 36)
         print '\nFINISHED TESTING Main Simulation...'
         print '-----------------------------------------------------\n'
 
