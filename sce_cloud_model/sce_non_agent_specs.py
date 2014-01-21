@@ -289,29 +289,7 @@ class TierNetMeterRateSchedule(RateSchedule):
         index_of_end_time = sce_settings.FIRST_INDEX_OF_MONTH[month_of_billing_period + 1]
         baseline_allocation_for_whole_month = baseline_allocation.get_integral_over_time_index(index_of_start_time, index_of_end_time)
         usage = load_profile.get_integral_over_time_index(index_of_start_time, index_of_end_time)
-        """
-        if bill_for_previous_month is None:
-            key = (month_of_billing_period, baseline_allocation_for_whole_month, usage, None)
-        else:
-            key = (month_of_billing_period, baseline_allocation_for_whole_month, usage, bill_for_previous_month.get_cumulative_usage_over_current_relevant_period())
-        if key in self.history_of_calculations.keys():
-            b = self.history_of_calculations[key]
-            return TierNetMeterBill(customer_name, month_of_billing_period,
-                                {'month_of_relevant_period' : b.get_month_of_relevant_period(),
-                                 'usage' : b.get_usage(),
-                                 'cumulative_usage_charge_over_current_relevant_period' : b.get_cumulative_usage_charge_over_current_relevant_period(),
-                                 'cumulative_usage_over_current_relevant_period' : b.get_cumulative_usage_over_current_relevant_period(),
-                                 'baseline_allocation_for_this_month' : b.get_baseline_allocation_for_this_month(),
-                                 'units_of_basic_charge' : b.get_units_of_basic_charge(),
-                                 'units_of_tiered_variable_charge' : b.get_units_of_tiered_variable_charge(),
-                                 'units_of_net_surplus_compensation' : b.get_units_of_net_surplus_compensation(),
-                                 'total_basic_charge' : b.get_total_basic_charge(),
-                                 'total_tiered_variable_charge' : b.get_total_tiered_variable_charge(),
-                                 'total_net_surplus_compensation' : b.get_total_net_surplus_compensation(),
-                                 'basic_charge' : b.get_basic_charge(),
-                                 'tiered_variable_charge' : b.get_tiered_variable_charge(),
-                                 'net_surplus_compensation_rate' : b.get_net_surplus_compensation_rate()})
-        """
+        
         if self.rate_component_dictionary['customer_charge_demand_differentiated_flag'] == 1:
             peak = load_profile.get_integral_over_time_index(index_of_start_time, index_of_end_time)/sce_settings.NUMBER_OF_HOURS_IN_ONE_YEAR
             if peak <= self.rate_component_dictionary['demand_differentiated_break_point']:
@@ -326,10 +304,6 @@ class TierNetMeterRateSchedule(RateSchedule):
                                   self.rate_component_dictionary['T4_rate'],
                                   self.rate_component_dictionary['T5_rate']]
         net_surplus_compensation_rate = self.rate_component_dictionary['net_surplus_compensation_rate']                
-#        if load_profile.get_index_of_starting_time() > index_of_start_time or load_profile.get_end_time() < index_of_end_time:
-#            print "Error in TierNetMeterRateSchedule.generate_utility_bill(): load_profile does not contain desired month"
-#        if bill_for_previous_month is not None and month_of_billing_period != bill_for_previous_month.get_month_of_billing_period() + 1:
-#            print "Error in TierNetMeterRateSchedule.generate_utility_bill(): bill_for_previous_month is incorrect"
         units_of_basic_charge = sce_settings.NUMBER_OF_DAYS_IN_EACH_MONTH[month_of_billing_period % 12]
         sign_of_usage = sce_settings.sign(usage)
         absolute_usage = abs(usage)
@@ -365,6 +339,7 @@ class TierNetMeterRateSchedule(RateSchedule):
             units_of_net_surplus_compensation = 0
             total_net_surplus_compensation = 0
             cumulative_usage_charge_over_current_relevant_period = total_tiered_variable_charge + bill_for_previous_month.get_cumulative_usage_charge_over_current_relevant_period()
+        
         b = TierNetMeterBill(customer_name, month_of_billing_period,
                                 {'month_of_relevant_period' : month_of_relevant_period,
                                  'usage' : usage,
@@ -380,20 +355,13 @@ class TierNetMeterRateSchedule(RateSchedule):
                                  'basic_charge' : basic_charge,
                                  'tiered_variable_charge' : tiered_variable_charge,
                                  'net_surplus_compensation_rate' : net_surplus_compensation_rate})
-#        self.history_of_calculations[key] = b
         return b
                                 
-    def calculate_monthly_charge(self, load_profile, baseline_allocation, first_month_of_billing_period, number_of_months, bill_for_previous_month = None):
-#        if load_profile.get_start_time() > start_second or load_profile.get_end_time() < end_second:
-#            print "Error in TierNetMeterRateSchedule.generate_utility_bill(): load_profile does not contain desired month"
-#        if bill_for_previous_month is not None and first_month_of_billing_period != bill_for_previous_month.get_month_of_billing_period():
-#            print "Error in TierNetMeterRateSchedule.generate_utility_bill(): bill_for_previous_month is incorrect"                
+    def calculate_monthly_charge(self, load_profile, baseline_allocation, first_month_of_billing_period, number_of_months, bill_for_previous_month = None):          
         monthly_charge = []
-#        start = time.clock()
         for m in range(first_month_of_billing_period, first_month_of_billing_period + number_of_months):
             bill_for_previous_month = self.generate_utility_bill('', load_profile, baseline_allocation, m, bill_for_previous_month)
             monthly_charge.append(bill_for_previous_month.get_total_basic_charge() + bill_for_previous_month.get_total_tiered_variable_charge() - bill_for_previous_month.get_total_net_surplus_compensation())
-#        print (time.clock() - start)
         return monthly_charge
     
 
@@ -896,12 +864,6 @@ class PvTechnology(Technology):
         return self.parameter_dictionary['efficiency'].get_value_at_time(time)
     
     def get_reduction_in_load_over_time_index(self, index_of_start_time, index_of_end_time, parameter_dictionary):
-#        purchase_index = sce_settings.FIRST_INDEX_OF_MONTH[self.parameter_dictionary['purchase_month']]
-#        efficiency = self.parameter_dictionary['efficiency'].get_trace_over_time_index(index_of_start_time - purchase_index, index_of_end_time - purchase_index)
-#        efficiency.set_index_of_starting_time(purchase_index)        
-#        solar_intensity_profile = parameter_dictionary['solar_intensity_profile'].get_trace_over_time_index(index_of_start_time, index_of_end_time)
-#        solar_intensity_profile.scale_values(self.parameter_dictionary['quantity']*self.parameter_dictionary['conversion_factor'])
-#        solar_profile = solar_intensity_profile * efficiency
         solar_profile = parameter_dictionary['solar_intensity_profile'].get_trace_over_time_index(index_of_start_time, index_of_end_time)
         solar_profile.scale_values(self.parameter_dictionary['quantity']*self.parameter_dictionary['conversion_factor'])
         return solar_profile
@@ -976,8 +938,7 @@ class PvInstaller(TechnologyInstaller):
     def __init__(self, name, parameter_dictionary):
         super(PvInstaller,self).__init__(name, parameter_dictionary)
         self.parameter_dictionary['history_of_calculations'] = dict()
-        self.consumptionBin_systemSize = {1.0: 1.0, 2.0: 2.0, 3.0: 2.0, 4.0: 3.0, 5.0: 3.0, 6.0: 6.0}
-    
+
     def get_name_of_technology(self):
         return 'Pv System'
         
@@ -990,7 +951,8 @@ class PvInstaller(TechnologyInstaller):
                                            'efficiency': Trace([float(x) for x in specs['parameter_dictionary']['efficiency']['list_of_values']], specs['parameter_dictionary']['efficiency']['index_of_begin_tick']),
                                            'cost_per_kw': Trace([float(x) for x in specs['parameter_dictionary']['cost_per_kw']['list_of_values']], specs['parameter_dictionary']['cost_per_kw']['index_of_begin_tick']),
                                            'term_in_months': specs['parameter_dictionary']['term_in_months'],
-                                           'annual_interest_rate': specs['parameter_dictionary']['annual_interest_rate']}) 
+                                           'annual_interest_rate': specs['parameter_dictionary']['annual_interest_rate'],
+                                           'consumptionBin_systemSize': specs['parameter_dictionary']['consumptionBin_systemSize']}) 
                                                    
     def get_kw_per_panel(self):
         return self.parameter_dictionary['kw_per_panel']
@@ -1027,7 +989,7 @@ class PvInstaller(TechnologyInstaller):
         original_load_profile = load_profile.get_trace_over_time_index(index_of_current_time, index_of_end_time)        
         monthly_utility_bill = rate_schedule.calculate_monthly_charge(original_load_profile, baseline_allocation, current_month, term_in_months)
         original_net_present_value_of_utility_bill = self.calculate_net_present_value(monthly_utility_bill, annual_interest_rate)    
-        technology_quantity = int(self.consumptionBin_systemSize[consumption_bin])
+        technology_quantity = int(self.parameter_dictionary['consumptionBin_systemSize'][consumption_bin])
         for candidate_pv_technology in parameter_dictionary['pv_dictionary']:
             if  candidate_pv_technology is not None and  candidate_pv_technology.get_quantity() ==  technology_quantity:
                 best_technology =  candidate_pv_technology

@@ -27,9 +27,9 @@ class specparser(object):
         self.rate_schedule_dictionary = {}
         sce_settings.set_time_axis(sce_settings.SAMPLE_EVERY_MONTH, 50)
         self.simulator = Simulator()
+        self.simulation_runTime = int(sce_generate_yaml_dct.runTime)
             
     def main(self):
-#           try:
                 SimulatorClock('clock', self.simulator)
                 specs = sce_generate_yaml_dct.specs
                                                 
@@ -107,9 +107,6 @@ class specparser(object):
                                     for key_cust, value_cust in self.residential_customer_category_dictionary.items():
                                          value_util.add_customer_category(value_cust, value_cust.parameter_dictionary['name_of_baseline_region'])
                          
-#                         else:
-#                             raise Exception('unrecognized object type in YAML file')
-                            
                 # connect utility, customer agents and clock                        
                 # create aggregate variables
                 Aggregator('dictionary_of_rate_schedule', self.simulator, 'dict')
@@ -155,35 +152,7 @@ class specparser(object):
                 for key_util, value_util in self.utility_dictionary.items():
                     self.simulator.connect_variable('clock', 'index_of_end_time_of_current_step', value_util.__name__, 'index_of_end_time_of_current_step')
                     
-#           except Exception:  
-#                 error_line = traceback.format_exc()
-#                 
-#                 # Log error  
-#                 error_logger = logging.getLogger('errorLogger')
-#                 error_logger.error('ERROR PARSING YAML\n' + error_line)
-#                 
-#                 # Print error to stdout
-#                 print ''
-#                 print '!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
-#                 print 'ERROR PARSING YAML' 
-#                 print error_line
-#                 print '!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
-#                 print ''
-                
-                
                 
 logging.config.dictConfig(yaml.load(open('log_specs.yaml', 'r')))                    
 a = specparser()
 a.main()
-
-# print (a.technology_installer_dictionary)
-# print (a.technology_dictionary)
-# print (a.consumption_profile_dictionary) 
-# print (a.solar_intensity_profile_dictionary) 
-# print (a.baseline_region_dictionary) 
-# print (a.rate_schedule_dictionary) 
-# print (a.utility_dictionary) 
-# print (a.residential_customer_category_dictionary)           
-# a.simulator.print_agent_and_aggregator_names()
-# a.simulator.print_write_variables_for_all_agents_and_aggregators()
-# a.simulator.print_read_variables_for_all_agents_and_aggregators()         

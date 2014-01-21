@@ -24,11 +24,11 @@ class TestAgents(unittest.TestCase):
     def setUp(self):
        self.test_parser = sce_simulation_init.specparser()
        self.test_parser.main()
-       
+       self.runTime = self.test_parser.simulation_runTime
     def test_agents(self):
         print '\n-----------------------------------------------------'
         print 'TESTING Main Simulation...\n'
-        simulation_dct['test_ID'] = self.test_parser.simulator.execute(time_horizon = 36)
+        simulation_dct['test_ID'] = self.test_parser.simulator.execute(time_horizon = self.runTime)
         print '\nFINISHED TESTING Main Simulation...'
         print '-----------------------------------------------------\n'
 

@@ -16,6 +16,8 @@ pv_parameters = workbook.sheet_by_name('PV_Parameters')
 tariff_structures = workbook.sheet_by_name('Executive_Summary')
 utility_costs = workbook.sheet_by_name('Utility_Costs')
 
+runTime = tariff_structures.cell_value(1, 5)
+
 """ generate_yaml_dct """
 yaml_dct = {}
 technology_installer_dictionary = {}
@@ -50,6 +52,10 @@ adoption_model_dct['model_type_p_bin_2'] = float(adoption_model.cell_value(model
 adoption_model_dct['model_type_q_bin_2'] = float(adoption_model.cell_value(model_row, model_col + 7))
 adoption_model_dct['model_type_p_bin_3'] = float(adoption_model.cell_value(model_row, model_col + 8))
 adoption_model_dct['model_type_q_bin_3'] = float(adoption_model.cell_value(model_row, model_col + 9))
+adoption_model_dct['initial_adopters']  = int(tariff_structures.cell_value(4, 5))
+adoption_model_dct['total_population'] = int(consumption_categories.cell_value(1, 0))
+adoption_model_dct['shading_assumption']  = 1 - float(pv_parameters.cell_value(20, 0))
+
 
 """ Parse Consumption Categories Worksheet """
 customer_categories_dct = {}
@@ -85,6 +91,10 @@ for pv_col in range(pv_col, pv_parameters.ncols):
     pv_col += 1
 pv_parameters_dct['power_production'] =  int(pv_parameters.cell_value(8, 0))
 
+consumptionBin_systemSize = {}
+for pv_row in range(12, 18):
+    consumptionBin_systemSize[int(pv_parameters.cell_value(pv_row, 0))] = pv_parameters.cell_value(pv_row, 1)
+    
 """ Parse Tariff Structures Worksheet """
 tariff_structure_dct = {}
 # Get Number of Tiers
@@ -164,6 +174,7 @@ tech_installer_parameter_dictionary['cost_per_kw']['list_of_values'] = pv_parame
 tech_installer_parameter_dictionary['cost_per_kw']['index_of_begin_tick'] = 0
 tech_installer_parameter_dictionary['term_in_months'] = 240
 tech_installer_parameter_dictionary['annual_interest_rate'] = 5
+tech_installer_parameter_dictionary['consumptionBin_systemSize'] = consumptionBin_systemSize
 
 tech_installer_specs = {}
 tech_installer_specs['type'] = 'PvInstaller'
@@ -363,11 +374,6 @@ rate_specs['rate_update_rules_dictionary'] = rate_update_rules_dictionary
 
 rate_schedule_dictionary['rate_schedule_2'] = {}
 rate_schedule_dictionary['rate_schedule_2']['specs'] = rate_specs
-# for k, v in rate_schedule_dictionary.iteritems():
-#     print k
-#     for k1, v1 in v['specs']['rate_component_dictionary'].iteritems():
-#         print k1, v1
-#     print '\n'
 specs.append({'rate_schedule_dictionary': rate_schedule_dictionary})
 
 # define utility
@@ -383,11 +389,6 @@ util_specs['parameter_dictionary'] = util_parameter_dictionary
 
 utility_dictionary['utility_1'] = {}
 utility_dictionary['utility_1']['specs'] = util_specs
-# for k, v in utility_dictionary.iteritems():
-#     print k
-#     for k1, v1 in v['specs']['parameter_dictionary'].iteritems():
-#         print k1, v1
-#     print '\n'
 specs.append({'utility_dictionary': utility_dictionary})
 
 # define residential customer categories
@@ -419,7 +420,9 @@ for consumption_category, customer_count in customer_categories_dct.iteritems():
     cust_parameter_dictionary['adoption_parameter_p_bin_3']  = adoption_model_dct['model_type_p_bin_3']
     cust_parameter_dictionary['adoption_parameter_q_bin_3']  = adoption_model_dct['model_type_q_bin_3']
     cust_parameter_dictionary['name_of_baseline_region'] = 'Zone 1'
-        
+    cust_parameter_dictionary['initial_adopters'] = adoption_model_dct['initial_adopters']
+    cust_parameter_dictionary['total_population'] = adoption_model_dct['total_population']
+    cust_parameter_dictionary['shading_assumption'] = adoption_model_dct['shading_assumption']     
     cust_specs = {}
     cust_specs['type'] = 'ResidentialCustomerCategory'
     cust_specs['parameter_dictionary'] = cust_parameter_dictionary

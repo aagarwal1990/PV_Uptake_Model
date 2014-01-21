@@ -159,7 +159,10 @@ class ResidentialCustomerCategory(Agent):
                                          'adoption_parameter_q_bin_2': specs['parameter_dictionary']['adoption_parameter_q_bin_2'], 
                                          'adoption_parameter_p_bin_3': specs['parameter_dictionary']['adoption_parameter_p_bin_3'], 
                                          'adoption_parameter_q_bin_3': specs['parameter_dictionary']['adoption_parameter_q_bin_3'],  
-                                         'name_of_baseline_region': specs['parameter_dictionary']['name_of_baseline_region']})
+                                         'name_of_baseline_region': specs['parameter_dictionary']['name_of_baseline_region'],
+                                         'initial_adopters': specs['parameter_dictionary']['initial_adopters'],
+                                         'total_population': specs['parameter_dictionary']['total_population'],
+                                         'shading_assumption': specs['parameter_dictionary']['shading_assumption']})
                                          
     def get_customer_category_name(self):
         return self.parameter_dictionary['customer_category_name']
@@ -306,18 +309,30 @@ class ResidentialCustomerCategory(Agent):
                     P_fit = self.parameter_dictionary['adoption_parameter_pClassic']
                     Q_fit = self.parameter_dictionary['adoption_parameter_qClassic']
                     B_fit = self.parameter_dictionary['adoption_parameter_bClassic']
+                    initial_adopters = self.parameter_dictionary['initial_adopters']
+                    total_population = self.parameter_dictionary['total_population']
 
                     if self.parameter_dictionary['model_type'].lower() == 'Classic Bass Model With Savings'.lower():
                         savingsBin = self.get_savings_bin(savings)
                         P_fit, Q_fit = self.get_P_Q_vals(savingsBin)
-                        probability = (P_fit + (Q_fit) * (float(current_number_of_adopters + 100*400) / (4.2 * math.pow(10, 6) * 0.3)))
+                        probability = (P_fit + (Q_fit) * (float(current_number_of_adopters + initial_adopters) / (total_population * 0.3)))
                         
                     if self.parameter_dictionary['model_type'].lower() == 'Classic Bass Model'.lower():
-                        probability = (P_fit + (Q_fit) * (float(current_number_of_adopters + 100*400) / (4.2 * math.pow(10, 6) * 0.3)))
+                        probability = (P_fit + (Q_fit) * (float(current_number_of_adopters + initial_adopters) / (total_population * 0.3)))
                     
                     if self.parameter_dictionary['model_type'].lower() == 'Bass Model With Savings'.lower():
-                        probability = (P_fit + (Q_fit) * (float(current_number_of_adopters + 100*400) / (4.2 * math.pow(10, 6) * 0.3))) * ((B_fit * savings) / math.sqrt(1 + math.pow(B_fit * savings, 2)))   
+                        probability = (P_fit + (Q_fit) * (float(current_number_of_adopters + initial_adopters) / (total_population * 0.3))) * ((B_fit * savings) / math.sqrt(1 + math.pow(B_fit * savings, 2)))   
+                    
                     number_of_adopters = round(probability * self.parameter_dictionary['pv_dictionary'][None])
+                    current_pv_adopters = 0
+                    for pv_technology, number_of_customers in self.parameter_dictionary['pv_dictionary'].iteritems():
+                        if pv_technology is not None:
+                            current_pv_adopters += number_of_customers
+                    
+                    number_of_eligible_customers = self.get_number_of_customers() * self.parameter_dictionary['shading_assumption']       
+                    if current_pv_adopters + number_of_adopters > number_of_eligible_customers:
+                            number_of_adopters = number_of_eligible_customers - current_pv_adopters
+                        
                     self.parameter_dictionary['pv_dictionary'][technology] += number_of_adopters
                     self.parameter_dictionary['pv_dictionary'][None] -= number_of_adopters
                     number_of_pv_adopters = 0
