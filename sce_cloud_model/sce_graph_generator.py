@@ -402,9 +402,9 @@ def CreateExcelFromResults(results, categories, pvtechs):
     # Write Results into an Excel Sheet
     book = xlwt.Workbook(encoding="utf-8")
     
-# SetUp Adoption Sheet 
+    # SetUp Adoption Sheet 
     adoption_sheet = book.add_sheet("Adoption_Numbers", cell_overwrite_ok=True)
-# Set time column in Adoption Sheet
+    # Set time column in Adoption Sheet
     adoption_sheet.write(0, 0, "Time_Step")
     a = time_graph('utility_log_number_of_customers', 'time', 'total')
     a.main()
@@ -459,25 +459,55 @@ def CreateExcelFromResults(results, categories, pvtechs):
             a.main()
             write_sorted_tups(a.graph_list_of_tups, col, load_profile_sheet)
             col += 1
-#     #         
-    #         adoption_sheet.write(0, col, "Average Tiered Variable Charge for Non Adopters in " + filter)
-    #         a = time_graph('utility_log_total_tiered_variable_charge', 'time', 'average', lst_of_PVTech_types = [None], lst_of_customer_category_names = category_lst)
-    #         a.main()
-    #         write_sorted_tups(a.graph_list_of_tups, col)
-    #         col += 1
-    #         
-    #         adoption_sheet.write(0, col, "Average Tiered Variable Charge for Adopters in " + filter)
-    #         a = time_graph('utility_log_total_tiered_variable_charge', 'time', 'average', lst_of_PVTech_types = Tech_types, lst_of_customer_category_names = category_lst)
-    #         a.main()
-    #         write_sorted_tups(a.graph_list_of_tups, col)
-    #         col += 1
-    #         
-    #         adoption_sheet.write(0, col, "Average PV Kilowatt Production in " + filter)
-    #         a = time_graph('utility_log_total_PV_kilowatts', 'time', 'average', lst_of_PVTech_types = Tech_types, lst_of_customer_category_names = category_lst)
-    #         a.main()
-    #         write_sorted_tups(a.graph_list_of_tups, col)
-    #         col += 1
+            
+    # SetUp Tiered Variable Profile Sheet
+    tiered_variable_sheet = book.add_sheet("Tiered_Variable_Charge", cell_overwrite_ok=True)
+    # Set time column in Load Profile Sheet
+    tiered_variable_sheet.write(0, 0, "Time_Step")
+    a = time_graph('utility_log_number_of_customers', 'time', 'total')
+    a.main()
+    print_lst = [(x,y) for x, y in a.graph_list_of_tups if x in correct_keys]
+    temp = sorted(print_lst,key=itemgetter(0))
+    time_values = [x for x, y in temp]
+    row = 1
+    for n in time_values:
+        tiered_variable_sheet.write(row, 0, n)  
+        row += 1
 
+    col = 1   
+    for filter, category_lst in all_filters:
+        if 'Tier' in filter:
+            tier = int(filter.split('Tier')[1])
+            tiered_variable_sheet.write(0, col, "Average Tiered Variable Charge in " + filter)
+            a = time_graph('utility_log_tiered_variable_charge', 'time', 'total', lst_of_tiers = [tier])
+            a.main()
+            write_sorted_tups(a.graph_list_of_tups, col, tiered_variable_sheet)
+            col += 1
+                        
+    # SetUp Total PV KiloWatt Production Sheet
+    pv_production_sheet = book.add_sheet("Total_PV_Kilowatt_Production", cell_overwrite_ok=True)
+    # Set time column in Load Profile Sheet
+    pv_production_sheet.write(0, 0, "Time_Step")
+    a = time_graph('utility_log_number_of_customers', 'time', 'total')
+    a.main()
+    print_lst = [(x,y) for x, y in a.graph_list_of_tups if x in correct_keys]
+    temp = sorted(print_lst,key=itemgetter(0))
+    time_values = [x for x, y in temp]
+    row = 1
+    for n in time_values:
+        pv_production_sheet.write(row, 0, n)  
+        row += 1
+
+    col = 1   
+    for filter, category_lst in all_filters:
+        if 'Tier' not in filter:
+            pv_production_sheet.write(0, col, "Average PV Kilowatt Production in " + filter)
+            a = time_graph('utility_log_total_PV_kilowatts', 'time', 'total', lst_of_PVTech_types = Tech_types, lst_of_customer_category_names = category_lst)
+            a.main()
+            write_sorted_tups(a.graph_list_of_tups, col, pv_production_sheet)
+            col += 1
+            
+        
     book.save('Rossi_test.xls')
 
     print '--------------- Tiered Variable Charge vs. Time ---------------------'
@@ -491,3 +521,12 @@ def CreateExcelFromResults(results, categories, pvtechs):
     return book
 
 CreateExcelFromResults(results_dict, category_names, pv_tech_sizes)
+
+#             tiered_variable_sheet.write(0, col, "Average Tiered Variable Charge in " + filter)
+#             a = time_graph('utility_log_total_tiered_variable_charge', 'time', 'average', lst_of_PVTech_types = Tech_types, lst_of_customer_category_names = category_lst)
+#             a.main()
+#             write_sorted_tups(a.graph_list_of_tups, col, tiered_variable_sheet)
+#             col += 1
+        
+
+
