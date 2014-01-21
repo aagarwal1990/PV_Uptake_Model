@@ -9,6 +9,7 @@ import logging
 import logging.config
 from operator import itemgetter
 import xlwt
+import xlsxwriter
  
 test_parser = sce_simulation_init.specparser()
 test_parser.main()
@@ -403,7 +404,11 @@ def CreateExcelFromResults(results, categories, pvtechs):
         temp = [y for x, y in temp]
         row = 1
         for val in temp:
-            arg_sheet.write(row, col, val)
+            if (row + 1) % 12 == 0:
+                cell_style = xlwt.easyxf('font: color red, bold on; pattern: back_color yellow;')
+                arg_sheet.write(row, col, val, style = cell_style)
+            else:
+                arg_sheet.write(row, col, val)
             row += 1
             
     # Write Results into an Excel Sheet
@@ -514,9 +519,9 @@ def CreateExcelFromResults(results, categories, pvtechs):
             write_sorted_tups(a.graph_list_of_tups, col, pv_production_sheet)
             col += 1
             
-# SetUp Average Savings Production Sheet
+    # SetUp Average Savings Production Sheet
     savings_sheet = book.add_sheet("Average_Savings", cell_overwrite_ok=True)
-# Set time column in Load Profile Sheet
+    # Set time column in Load Profile Sheet
     savings_sheet.write(0, 0, "Time_Step")
     a = time_graph('utility_log_number_of_customers', 'time', 'total')
     a.main()
@@ -537,17 +542,7 @@ def CreateExcelFromResults(results, categories, pvtechs):
             write_sorted_tups(a.graph_list_of_tups, col, savings_sheet)
             col += 1
             
-        
-    book.save('Rossi_test.xls')
-
-    print '--------------- Tiered Variable Charge vs. Time ---------------------'
-    a = time_graph('utility_log_tiered_variable_charge', 'time', 'total')
-    a.main()
-    print_lst = [(x,y) for x, y in a.graph_list_of_tups if x in correct_keys]
-    temp = sorted(print_lst,key=itemgetter(0))
-    temp = [y for x, y in temp]
-    print temp
-    
+    book.save('Rossi_test.xls')    
     return book
 
 CreateExcelFromResults(results_dict, category_names, pv_tech_sizes)
