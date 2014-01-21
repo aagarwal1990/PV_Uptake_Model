@@ -148,7 +148,10 @@ def CreateExcelFromResults(results, categories, pvtechs):
            elif operator is 'max':
                val = max(lst)
            elif operator is 'average':
-               val = sum(lst)/pop_count
+               if int(pop_count) is not 0:
+                    val = sum(lst)/pop_count
+               else:
+                    val = 0
            elif operator is 'mode':
                val = collections.Counter(lst).most_common(1)[0][0]
            elif operator is 'cumulative':
@@ -203,12 +206,11 @@ def CreateExcelFromResults(results, categories, pvtechs):
                                         temp_lst.append(float(load_prof[0]) * float(num_cust))
                 return self.list_operator(temp_lst, self.op)  
  
- 
        # parses one time_step of the utility_log_dct           
        def parse_utility_log_key(self, time_step, utility_dct):
                     temp_lst = []
+                    population_count = 0
                     for category_name, pv_dct in utility_dct.iteritems():
-                        population_count = 0
                         # count only if customer_category appears in customer_category inputted
                         if category_name in self.customer_category_lst:
                             # get tier for customer_category 
@@ -227,6 +229,7 @@ def CreateExcelFromResults(results, categories, pvtechs):
                                         else:
                                             temp_lst.append(attribute_dct_lst[0][self.y_axis] * attribute_dct_lst[0]['utility_log_number_of_customers'])
                                             population_count += attribute_dct_lst[0]['utility_log_number_of_customers']
+#                                             print category_name, attribute_dct_lst[0]['utility_log_number_of_customers'], population_count
                     return self.list_operator(temp_lst, self.op, population_count)     
                                                 
        def main(self):
@@ -251,7 +254,7 @@ def CreateExcelFromResults(results, categories, pvtechs):
                     self.graph_list_of_tups.sort()
                     if self.op == 'cumulative':
                         self.graph_list_of_tups = self.cumulate_lst_of_tup(self.graph_list_of_tups)
-                                                                       
+                                                                    
     class sweep_graph(graph):
        def __init__(self, y_axis, x_axis, operation, time_step, lst_of_customer_category_names = CATEGORY_NAMES, lst_of_PVTech_types = PV_TECH_SIZES + [None], lst_of_tiers = CUSTOMER_TIERS, dict_customer_log = DCT_CUSTOMER_LOG, dict_utility_log = DCT_UTILITY_LOG):
            super(sweep_graph,self).__init__(y_axis, x_axis, operation, lst_of_customer_category_names, lst_of_PVTech_types, lst_of_tiers, dict_customer_log, dict_utility_log)
@@ -384,24 +387,25 @@ def CreateExcelFromResults(results, categories, pvtechs):
     for i in CUSTOMER_TIERS:
         tup = ('Tier' + str(i), 0)
         all_filters.append(tup)
-            
+                
     Tech_types = PV_TECH_SIZES
-
-    # Write Results into an Excel Sheet
-    book = xlwt.Workbook(encoding="utf-8")
-    sheet1 = book.add_sheet("Rossi", cell_overwrite_ok=True)
-
-    def write_sorted_tups(lst_of_tups, col):
+    
+    def write_sorted_tups(lst_of_tups, col, arg_sheet):
         print_lst = [(x,y) for x, y in lst_of_tups if x in correct_keys]
         temp = sorted(print_lst,key=itemgetter(0))
         temp = [y for x, y in temp]
         row = 1
         for val in temp:
-            sheet1.write(row, col, val)
+            arg_sheet.write(row, col, val)
             row += 1
-                
-    # Set time column
-    sheet1.write(0, 0, "Time_Step")
+            
+    # Write Results into an Excel Sheet
+    book = xlwt.Workbook(encoding="utf-8")
+    
+# SetUp Adoption Sheet 
+    adoption_sheet = book.add_sheet("Adoption_Numbers", cell_overwrite_ok=True)
+# Set time column in Adoption Sheet
+    adoption_sheet.write(0, 0, "Time_Step")
     a = time_graph('utility_log_number_of_customers', 'time', 'total')
     a.main()
     print_lst = [(x,y) for x, y in a.graph_list_of_tups if x in correct_keys]
@@ -409,49 +413,66 @@ def CreateExcelFromResults(results, categories, pvtechs):
     time_values = [x for x, y in temp]
     row = 1
     for n in time_values:
-        sheet1.write(row, 0, n)  
+        adoption_sheet.write(row, 0, n)  
         row += 1
 
     col = 1   
     for filter, category_lst in all_filters:
         if 'Tier' not in filter:
-            sheet1.write(0, col, "No. of Customers in " + filter)
+            adoption_sheet.write(0, col, "No. of Customers in " + filter)
             a = time_graph('utility_log_number_of_customers', 'time', 'total', lst_of_customer_category_names = category_lst)
             a.main()
-            write_sorted_tups(a.graph_list_of_tups, col)
+            write_sorted_tups(a.graph_list_of_tups, col, adoption_sheet)
             col += 1
         
-            sheet1.write(0, col, "No. of PV Adopters in " + filter)
+            adoption_sheet.write(0, col, "No. of PV Adopters in " + filter)
             a = time_graph('customer_log_number_of_pv_adopters', 'time', 'total', lst_of_PVTech_types = Tech_types, lst_of_customer_category_names = category_lst)
             a.main()
-            write_sorted_tups(a.graph_list_of_tups, col)
+            write_sorted_tups(a.graph_list_of_tups, col, adoption_sheet)
             col += 1
-                        
-    #         sheet1.write(0, col, "Average Load profile for Non Adopters in " + filter)
-    #         a = time_graph('utility_log_usage', 'time', 'average', lst_of_PVTech_types = [None], lst_of_customer_category_names = category_lst)
-    #         a.main()
-    #         write_sorted_tups(a.graph_list_of_tups, col)
-    #         col += 1
-    #         
-    #         sheet1.write(0, col, "Average Load profile for Adopters in "+ filter)
-    #         a = time_graph('utility_log_usage', 'time', 'average', lst_of_PVTech_types = Tech_types, lst_of_customer_category_names = category_lst)
-    #         a.main()
-    #         write_sorted_tups(a.graph_list_of_tups, col)
-    #         col += 1
-    #         
-    #         sheet1.write(0, col, "Average Tiered Variable Charge for Non Adopters in " + filter)
+            
+    # SetUp Load Profile Sheet
+    load_profile_sheet = book.add_sheet("Load_Profile", cell_overwrite_ok=True)
+    # Set time column in Load Profile Sheet
+    load_profile_sheet.write(0, 0, "Time_Step")
+    a = time_graph('utility_log_number_of_customers', 'time', 'total')
+    a.main()
+    print_lst = [(x,y) for x, y in a.graph_list_of_tups if x in correct_keys]
+    temp = sorted(print_lst,key=itemgetter(0))
+    time_values = [x for x, y in temp]
+    row = 1
+    for n in time_values:
+        load_profile_sheet.write(row, 0, n)  
+        row += 1
+
+    col = 1   
+    for filter, category_lst in all_filters:
+        if 'Tier' not in filter:
+            load_profile_sheet.write(0, col, "Average Load profile for Non Adopters in " + filter)
+            a = time_graph('utility_log_usage', 'time', 'average', lst_of_PVTech_types = [None], lst_of_customer_category_names = category_lst)
+            a.main()
+            write_sorted_tups(a.graph_list_of_tups, col, load_profile_sheet)
+            col += 1
+        
+            load_profile_sheet.write(0, col, "Average Load profile for Adopters in "+ filter)
+            a = time_graph('utility_log_usage', 'time', 'average', lst_of_PVTech_types = Tech_types, lst_of_customer_category_names = category_lst)
+            a.main()
+            write_sorted_tups(a.graph_list_of_tups, col, load_profile_sheet)
+            col += 1
+#     #         
+    #         adoption_sheet.write(0, col, "Average Tiered Variable Charge for Non Adopters in " + filter)
     #         a = time_graph('utility_log_total_tiered_variable_charge', 'time', 'average', lst_of_PVTech_types = [None], lst_of_customer_category_names = category_lst)
     #         a.main()
     #         write_sorted_tups(a.graph_list_of_tups, col)
     #         col += 1
     #         
-    #         sheet1.write(0, col, "Average Tiered Variable Charge for Adopters in " + filter)
+    #         adoption_sheet.write(0, col, "Average Tiered Variable Charge for Adopters in " + filter)
     #         a = time_graph('utility_log_total_tiered_variable_charge', 'time', 'average', lst_of_PVTech_types = Tech_types, lst_of_customer_category_names = category_lst)
     #         a.main()
     #         write_sorted_tups(a.graph_list_of_tups, col)
     #         col += 1
     #         
-    #         sheet1.write(0, col, "Average PV Kilowatt Production in " + filter)
+    #         adoption_sheet.write(0, col, "Average PV Kilowatt Production in " + filter)
     #         a = time_graph('utility_log_total_PV_kilowatts', 'time', 'average', lst_of_PVTech_types = Tech_types, lst_of_customer_category_names = category_lst)
     #         a.main()
     #         write_sorted_tups(a.graph_list_of_tups, col)
