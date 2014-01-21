@@ -44,7 +44,7 @@ def CreateExcelFromResults(results, categories, pvtechs):
                  number_of_customers_in_market_for_pv: int
                  name_of_rate_schedule_in_current_step: string
                  pv_dictionary : dictionary of (PvTechnology, number of customers with this PvTechnology)
-                 dictionary_of_load_profile_in_current_step : dictionary of (PvTechnology, (TimeTrace, number of customers with this load profile))
+                 dictionary_of_load_profile_in_current_step : dictionary of (PvTechnology, (TimeTrace, number of customers with this load profile, savings of customers with this load profile))
      
                 output:
                  'dict_customer_log = {time_step: {customer_category_name: [{attribute_dict}, ....], ....}, ....}'
@@ -54,7 +54,8 @@ def CreateExcelFromResults(results, categories, pvtechs):
             # Per customer_category & pv_tech_type
             self.dict_customer_log_keys = ['customer_log_number_of_pv_adopters', 
                                            'customer_log_number_of_customers_in_market_for_pv',
-                                           'customer_log_load_profile']
+                                           'customer_log_load_profile',
+                                           'customer_log_savings']
         
             '''
                  attributes:
@@ -188,6 +189,7 @@ def CreateExcelFromResults(results, categories, pvtechs):
        # parses one time_step of the customer_log_dct
        def parse_customer_log_key(self, time_step, customer_dct):
                 temp_lst = []
+                population_count = 0
                 for category_name, attribute_dct_lst in customer_dct.iteritems():
                     # count only if customer_category appears in customer_category inputted
                     if category_name in self.customer_category_lst:
@@ -199,12 +201,17 @@ def CreateExcelFromResults(results, categories, pvtechs):
                                 for pv_tech, number_of_cust in attribute_dct_lst[0]['customer_log_pv_dictionary'].iteritems():
                                     if pv_tech in self.PVTech_lst and pv_tech is not None:
                                             temp_lst.append(number_of_cust)
-                            # self.y_axis == 'load_profile'
+                            
                             else:
-                                for pv_tech, (load_prof, num_cust) in attribute_dct_lst[0]['customer_log_dictionary_of_load_profile_in_current_step'].iteritems():
+                                for pv_tech, (load_prof, num_cust, savings) in attribute_dct_lst[0]['customer_log_dictionary_of_load_profile_in_current_step'].iteritems():
                                     if pv_tech in self.PVTech_lst:
-                                        temp_lst.append(float(load_prof[0]) * float(num_cust))
-                return self.list_operator(temp_lst, self.op)  
+                                        if self.y_axis == 'customer_log_savings':
+                                            temp_lst.append(float(savings) * float(num_cust))
+                                        # self.y_axis == 'load_profile'
+                                        else:
+                                            temp_lst.append(float(load_prof[0]) * float(num_cust))
+                                        population_count += num_cust
+                return self.list_operator(temp_lst, self.op, population_count)  
  
        # parses one time_step of the utility_log_dct           
        def parse_utility_log_key(self, time_step, utility_dct):
@@ -478,7 +485,7 @@ def CreateExcelFromResults(results, categories, pvtechs):
     for filter, category_lst in all_filters:
         if 'Tier' in filter:
             tier = int(filter.split('Tier')[1])
-            tiered_variable_sheet.write(0, col, "Average Tiered Variable Charge in " + filter)
+            tiered_variable_sheet.write(0, col, "Tiered Variable Charge in " + filter)
             a = time_graph('utility_log_tiered_variable_charge', 'time', 'total', lst_of_tiers = [tier])
             a.main()
             write_sorted_tups(a.graph_list_of_tups, col, tiered_variable_sheet)
@@ -501,10 +508,33 @@ def CreateExcelFromResults(results, categories, pvtechs):
     col = 1   
     for filter, category_lst in all_filters:
         if 'Tier' not in filter:
-            pv_production_sheet.write(0, col, "Average PV Kilowatt Production in " + filter)
+            pv_production_sheet.write(0, col, "Total PV Kilowatt Production in " + filter)
             a = time_graph('utility_log_total_PV_kilowatts', 'time', 'total', lst_of_PVTech_types = Tech_types, lst_of_customer_category_names = category_lst)
             a.main()
             write_sorted_tups(a.graph_list_of_tups, col, pv_production_sheet)
+            col += 1
+            
+# SetUp Average Savings Production Sheet
+    savings_sheet = book.add_sheet("Average_Savings", cell_overwrite_ok=True)
+# Set time column in Load Profile Sheet
+    savings_sheet.write(0, 0, "Time_Step")
+    a = time_graph('utility_log_number_of_customers', 'time', 'total')
+    a.main()
+    print_lst = [(x,y) for x, y in a.graph_list_of_tups if x in correct_keys]
+    temp = sorted(print_lst,key=itemgetter(0))
+    time_values = [x for x, y in temp]
+    row = 1
+    for n in time_values:
+        savings_sheet.write(row, 0, n)  
+        row += 1
+
+    col = 1   
+    for filter, category_lst in all_filters:
+        if 'Tier' not in filter:
+            savings_sheet.write(0, col, "Average Savings in " + filter)
+            a = time_graph('customer_log_savings', 'time', 'average', lst_of_customer_category_names = category_lst)
+            a.main()
+            write_sorted_tups(a.graph_list_of_tups, col, savings_sheet)
             col += 1
             
         
@@ -521,12 +551,3 @@ def CreateExcelFromResults(results, categories, pvtechs):
     return book
 
 CreateExcelFromResults(results_dict, category_names, pv_tech_sizes)
-
-#             tiered_variable_sheet.write(0, col, "Average Tiered Variable Charge in " + filter)
-#             a = time_graph('utility_log_total_tiered_variable_charge', 'time', 'average', lst_of_PVTech_types = Tech_types, lst_of_customer_category_names = category_lst)
-#             a.main()
-#             write_sorted_tups(a.graph_list_of_tups, col, tiered_variable_sheet)
-#             col += 1
-        
-
-
