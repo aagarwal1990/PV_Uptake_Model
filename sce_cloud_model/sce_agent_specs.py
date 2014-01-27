@@ -464,7 +464,10 @@ class Utility(Agent):
             ratio_flag = self.rate_schedule_dictionary[rate_schedule_name].is_ratio()
             number_of_tiers = self.rate_schedule_dictionary[rate_schedule_name].get_number_of_tiers()
         
-        delivery_revenue_requirement = self.parameter_dictionary['delivery_revenue_requirement_per_year']
+        # Get delivery_revenue_requirement from list of annual revenue requirements inputted by user
+        # Find year of rate revision
+        year = int(math.floor(float(current_month) / 12)) 
+        delivery_revenue_requirement = self.parameter_dictionary['delivery_revenue_requirement_per_year'][year]
         generation_revenue_requirement_per_kwh = self.parameter_dictionary['generation_revenue_requirement_per_kwh']
         total_revenue_requirement = delivery_revenue_requirement + generation_revenue_requirement_per_kwh * total_usage
         

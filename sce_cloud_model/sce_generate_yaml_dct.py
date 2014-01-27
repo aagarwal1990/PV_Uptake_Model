@@ -174,8 +174,12 @@ utility_costs_dct['generation_marginal_energy_cost_summer_mid_peak'] = float(uti
 utility_costs_dct['generation_marginal_energy_cost_summer_off_peak'] = float(utility_costs.cell_value(2, utility_col))
 utility_costs_dct['generation_marginal_energy_cost_winter_on_peak'] = float(utility_costs.cell_value(3, utility_col))
 utility_costs_dct['generation_marginal_energy_cost_winter_off_peak'] = float(utility_costs.cell_value(4, utility_col))
-utility_costs_dct['total_system_delivery_costs'] = float(utility_costs.cell_value(8, utility_col))
 
+utility_total_system_delivery_costs = []
+for utility_col in range(1, utility_costs.ncols):
+    utility_revenue_req = float(utility_costs.cell_value(8, utility_col))
+    utility_total_system_delivery_costs.append(utility_revenue_req)
+utility_costs_dct['total_system_delivery_costs'] = utility_total_system_delivery_costs
 
 # initialize technology installer dictionary    
 tech_installer_parameter_dictionary = {}
