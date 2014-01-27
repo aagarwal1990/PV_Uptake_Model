@@ -628,19 +628,14 @@ class Utility(Agent):
                 baseline_coverage += 0.1 * ( number_of_customers - number_of_customers_below_baseline )
                 if baseline_coverage >= target_baseline_coverage_of_daily_summer_usage:
                     break
-            #            list_of_aggregate_daily_usage_over_summer_of_past_three_years = []
             distribution_of_total_winter_usage = []
             for customer_category_account in baseline_region.get_customer_category_account_list():
-#                list_of_aggregate_daily_usage_over_summer_of_past_three_years.append(customer_account.get_total_summer_usage(reference_start_month, reference_number_of_months) / sce_settings.NUMBER_OF_DAYS_IN_SUMMER)
                 distribution_of_total_winter_usage.extend(customer_category_account.get_distribution_of_total_winter_usage(reference_start_month, reference_number_of_months))
-#            list_of_aggregate_daily_usage_over_summer_of_past_three_years.sort()
             distribution_of_total_winter_usage.sort()
-#            print list_of_aggregate_daily_usage_over_summer_of_past_three_years
             target_baseline_coverage_of_daily_winter_usage = self.parameter_dictionary['baseline_as_percentage_of_aggregate_usage'] * sum([x[0]*x[1] for x in distribution_of_total_winter_usage])
             baseline_coverage = 0
             winter_baseline_in_kwh_per_day = 0
             number_of_customers_below_baseline = 0
-#            sorted_usage_iterator = iter(list_of_aggregate_daily_usage_over_summer_of_past_three_years)
             sorted_usage_iterator = iter(distribution_of_total_winter_usage)
             x = sorted_usage_iterator.next()
             while True:
@@ -652,6 +647,4 @@ class Utility(Agent):
                 if baseline_coverage >= target_baseline_coverage_of_daily_winter_usage:
                     break
             baseline_region.update_baseline_allocation(current_month + 1, summer_baseline_in_kwh_per_day, winter_baseline_in_kwh_per_day)
-#            print summer_baseline_in_kwh_per_day
-#            print winter_baseline_in_kwh_per_day
             
