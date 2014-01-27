@@ -14,7 +14,7 @@ adoption_model = workbook.sheet_by_name('Adoption_Model')
 consumption_categories = workbook.sheet_by_name('Category_Names')
 pv_parameters = workbook.sheet_by_name('PV_Parameters')
 tariff_structures = workbook.sheet_by_name('Executive_Summary')
-utility_costs = workbook.sheet_by_name('Utility_Costs')
+utility_costs = workbook.sheet_by_name('Annual_Utility_Tier_Prices')
 
 runTime = tariff_structures.cell_value(1, 7)
 
@@ -52,7 +52,7 @@ adoption_model_dct['model_type_p_bin_2'] = float(adoption_model.cell_value(model
 adoption_model_dct['model_type_q_bin_2'] = float(adoption_model.cell_value(model_row, model_col + 7))
 adoption_model_dct['model_type_p_bin_3'] = float(adoption_model.cell_value(model_row, model_col + 8))
 adoption_model_dct['model_type_q_bin_3'] = float(adoption_model.cell_value(model_row, model_col + 9))
-adoption_model_dct['initial_adopters']  = int(tariff_structures.cell_value(4, 7))
+adoption_model_dct['initial_adopters']  = int(consumption_categories.cell_value(1, 2))
 adoption_model_dct['total_population'] = int(consumption_categories.cell_value(1, 0))
 adoption_model_dct['shading_assumption']  = 1 - float(pv_parameters.cell_value(20, 0))
 
@@ -61,9 +61,7 @@ adoption_model_dct['shading_assumption']  = 1 - float(pv_parameters.cell_value(2
 customer_categories_dct = {}
 # Get consumption_categories and percentage population
 total_population = int(consumption_categories.cell_value(1, 0))
-category_row = 7
-category_col = 0
-for cat_row in range(category_row, consumption_categories.nrows):
+for cat_row in range(7, 11):
     category_col = 0
     Tenure = consumption_categories.cell_value(cat_row, category_col)
     category_col += 1
@@ -77,7 +75,25 @@ for cat_row in range(category_row, consumption_categories.nrows):
         category_name = 'Tenure:' + Tenure.upper() + 'RateSchedule:' + Rate.upper() + 'Consumption:Bin' + str(bin)
         customer_categories_dct[category_name] = int(category_population * total_population)
         category_col += 1
-
+        
+solar_customer_categories_dct = {}
+# Get consumption_categories and percentage population
+solar_total_population = int(consumption_categories.cell_value(1, 2))
+for solar_cat_row in range(16, 20):
+    solar_category_col = 0
+    solar_Tenure = consumption_categories.cell_value(solar_cat_row, solar_category_col)
+    solar_category_col += 1
+    solar_Rate =  consumption_categories.cell_value(solar_cat_row, solar_category_col)
+    solar_category_col += 1
+    solar_aggregate_population = float(consumption_categories.cell_value(solar_cat_row, solar_category_col)) * 0.01
+    solar_category_col += 1
+    for solar_bin in range(1, 7):
+        solar_temp_population = float(consumption_categories.cell_value(solar_cat_row, solar_category_col)) * 0.01
+        solar_category_population = solar_temp_population * solar_aggregate_population
+        solar_category_name = 'Tenure:' + solar_Tenure.upper() + 'RateSchedule:' + solar_Rate.upper() + 'Consumption:Bin' + str(solar_bin)
+        solar_customer_categories_dct[solar_category_name] = int(solar_category_population * solar_total_population)
+        solar_category_col += 1
+        
 """ Parse PV Parameters Worksheet """
 pv_parameters_dct = {}
 # Get PV Prices
