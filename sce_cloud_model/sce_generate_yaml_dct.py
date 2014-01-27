@@ -16,7 +16,7 @@ pv_parameters = workbook.sheet_by_name('PV_Parameters')
 tariff_structures = workbook.sheet_by_name('Executive_Summary')
 utility_costs = workbook.sheet_by_name('Utility_Costs')
 
-runTime = tariff_structures.cell_value(1, 5)
+runTime = tariff_structures.cell_value(1, 7)
 
 """ generate_yaml_dct """
 yaml_dct = {}
@@ -52,7 +52,7 @@ adoption_model_dct['model_type_p_bin_2'] = float(adoption_model.cell_value(model
 adoption_model_dct['model_type_q_bin_2'] = float(adoption_model.cell_value(model_row, model_col + 7))
 adoption_model_dct['model_type_p_bin_3'] = float(adoption_model.cell_value(model_row, model_col + 8))
 adoption_model_dct['model_type_q_bin_3'] = float(adoption_model.cell_value(model_row, model_col + 9))
-adoption_model_dct['initial_adopters']  = int(tariff_structures.cell_value(4, 5))
+adoption_model_dct['initial_adopters']  = int(tariff_structures.cell_value(4, 7))
 adoption_model_dct['total_population'] = int(consumption_categories.cell_value(1, 0))
 adoption_model_dct['shading_assumption']  = 1 - float(pv_parameters.cell_value(20, 0))
 
@@ -141,13 +141,14 @@ tariff_structure_dct['T4_energy_CARE_discount'] = float(tariff_structures.cell_v
 tariff_structure_dct['T5_energy_CARE_discount'] = float(tariff_structures.cell_value(34, tariff_col))
 tariff_structure_dct['fixed_charge_CARE_discount'] = float(tariff_structures.cell_value(35, tariff_col))
 
-# Get CARE Discounts
-tariff_structure_dct['T1_rate'] = float(tariff_structures.cell_value(38, tariff_col))
-tariff_structure_dct['T2_rate'] = float(tariff_structures.cell_value(39, tariff_col))
-tariff_structure_dct['T3_rate'] = float(tariff_structures.cell_value(40, tariff_col))
-tariff_structure_dct['T4_rate'] = float(tariff_structures.cell_value(41, tariff_col))
-tariff_structure_dct['T5_rate'] = float(tariff_structures.cell_value(42, tariff_col))
-tariff_structure_dct['net_surplus_compensation_rate'] = float(tariff_structures.cell_value(43, tariff_col))
+# Get Tier Rates
+tariff_col_2 = 5
+tariff_structure_dct['T1_rate'] = float(tariff_structures.cell_value(1, tariff_col_2))
+tariff_structure_dct['T2_rate'] = float(tariff_structures.cell_value(2, tariff_col_2))
+tariff_structure_dct['T3_rate'] = float(tariff_structures.cell_value(3, tariff_col_2))
+tariff_structure_dct['T4_rate'] = float(tariff_structures.cell_value(4, tariff_col_2))
+tariff_structure_dct['T5_rate'] = float(tariff_structures.cell_value(5, tariff_col_2))
+tariff_structure_dct['net_surplus_compensation_rate'] = float(tariff_structures.cell_value(6, tariff_col_2))
 
 """ Parse Utility Costs worksheet """
 utility_costs_dct = {}
