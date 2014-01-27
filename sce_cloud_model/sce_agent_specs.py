@@ -428,13 +428,10 @@ class Utility(Agent):
     def step_forward(self):
         # read clock
         index_of_start_time_of_current_step = self.read('index_of_start_time_of_current_step')
-#        index_of_end_time_of_current_step = self.read('index_of_end_time_of_current_step')
         # read customer profiles and rate schedule decisions
         for (customer_category_agent_name,customer_category_agent_write_variable), dictionary_of_load_profile_in_current_step in self.read('customer_current_load_profile_dictionary').iteritems():
             # log and append bill to each customer's bill_history 
             self.customer_category_account_dictionary[customer_category_agent_name].add_load_profile(dictionary_of_load_profile_in_current_step)
-#        start = time.clock()
-#        print (time.clock() - start)
         # every three years, update rate schedules and baseline allocations
         month_of_current_step = index_of_start_time_of_current_step
         if ( month_of_current_step % 12 ) == 0 and month_of_current_step >= 12:
@@ -565,7 +562,6 @@ class Utility(Agent):
                         tiered_variable_charge_NONCARE[0] = tiered_variable_charge_NONCARE[0] * rate_update_rules_dictionary_NONCARE['T1_increase']
                         tiered_variable_charge_NONCARE[1] = tiered_variable_charge_NONCARE[1] * rate_update_rules_dictionary_NONCARE['T2_increase']
                         usage_NONCARE = calculation['total_tiered_usage']
-            #            print calculation['total_tiered_usage']
                         total_revenue_requirement = total_revenue_requirement - tiered_variable_charge_NONCARE[0] * calculation['total_tiered_usage'][0] - tiered_variable_charge_NONCARE[1] * calculation['total_tiered_usage'][1]                                
                         total_revenue_requirement = total_revenue_requirement - calculation['total_basic_charge']
                 if CARE == 0:
@@ -588,36 +584,23 @@ class Utility(Agent):
 
             for rate_schedule_name, calculation in rate_schedule_calculations.iteritems():
                 if self.rate_schedule_dictionary[rate_schedule_name].is_CARE():
-    #                print tiered_variable_charge_CARE
                     self.rate_schedule_dictionary[rate_schedule_name].set_tiered_variable_charge(tiered_variable_charge_CARE)
                 else:
-    #                print tiered_variable_charge_NONCARE
                     self.rate_schedule_dictionary[rate_schedule_name].set_tiered_variable_charge(tiered_variable_charge_NONCARE)
-        #            print delivery_revenue_requirement
-        #            print calculation['total_tiered_usage']
-        #            print total_usage
-        #            print tiered_variable_charge
             
     def _update_baseline_allocations(self, current_month, reference_start_month, reference_number_of_months):
         for baseline_region in self.baseline_region_dictionary.values():
-#            number_of_customers = len(baseline_region.get_customer_account_list()) + 1
             number_of_customers = 0
             for customer_category_account in baseline_region.get_customer_category_account_list():
                 number_of_customers += customer_category_account.get_number_of_customers() 
-#            list_of_aggregate_daily_usage_over_summer_of_past_three_years = []
             distribution_of_total_summer_usage = []
             for customer_category_account in baseline_region.get_customer_category_account_list():
-#                list_of_aggregate_daily_usage_over_summer_of_past_three_years.append(customer_account.get_total_summer_usage(reference_start_month, reference_number_of_months) / sce_settings.NUMBER_OF_DAYS_IN_SUMMER)
                 distribution_of_total_summer_usage.extend(customer_category_account.get_distribution_of_total_summer_usage(reference_start_month, reference_number_of_months))
-#            list_of_aggregate_daily_usage_over_summer_of_past_three_years.sort()
             distribution_of_total_summer_usage.sort()
-#             print distribution_of_total_summer_usage
-#            print list_of_aggregate_daily_usage_over_summer_of_past_three_years
             target_baseline_coverage_of_daily_summer_usage = self.parameter_dictionary['baseline_as_percentage_of_aggregate_usage'] * sum([x[0]*x[1] for x in distribution_of_total_summer_usage])
             baseline_coverage = 0
             summer_baseline_in_kwh_per_day = 0
             number_of_customers_below_baseline = 0
-#            sorted_usage_iterator = iter(list_of_aggregate_daily_usage_over_summer_of_past_three_years)
             sorted_usage_iterator = iter(distribution_of_total_summer_usage)
             x = sorted_usage_iterator.next()
             while True:

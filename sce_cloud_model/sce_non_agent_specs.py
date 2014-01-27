@@ -705,23 +705,19 @@ class CustomerCategoryAccount(object):
 
     
     def add_load_profile(self, new_dictionary_of_load_profile):
-#        self.dictionary_of_unprocessed_load_profile = new_dictionary_of_load_profile
         for pv_technology, value in new_dictionary_of_load_profile.iteritems():
             unprocessed_load_profile = value[0]
             number_of_customers = value[1]
             m1 = unprocessed_load_profile.get_start_month()
             m2 = unprocessed_load_profile.get_end_month()
             bill = None if m1 == 0 else self.bill_history[m1-1][pv_technology][0]
-#            bill = None if (not self.bill_history or pv_technology not in self.bill_history[m1])else self.bill_history[m1-1][pv_technology][0]
             for month in range(m1,m2):
                 bill = self.current_rate_schedule.generate_utility_bill(self.customer_category_name, unprocessed_load_profile, self.baseline_region.get_baseline_allocation(), month, bill)
                 if month not in self.bill_history:
                     self.bill_history[month] = dict()
                 self.bill_history[month][pv_technology] = (bill, number_of_customers)
                 self.log_bill(bill, pv_technology, number_of_customers)
-#            self.unprocessed_load_profile.remove_trace_before_time_index(sce_settings.FIRST_INDEX_OF_MONTH[m2])
-
-
+                
 class BaselineRegion(object):
     """
     A class for a baseline zone.  
