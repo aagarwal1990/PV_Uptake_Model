@@ -475,11 +475,13 @@ class Utility(Agent):
             CARE = 0
             for rate_schedule_name, calculation in rate_schedule_calculations.iteritems():
                 if self.rate_schedule_dictionary[rate_schedule_name].is_CARE():
+                    tiered_variable_charge_CARE = self.rate_schedule_dictionary[rate_schedule_name].get_tiered_variable_charge()[:]
                     rate_update_rules_dictionary_CARE = self.rate_schedule_dictionary[rate_schedule_name].get_rate_update_rules_dictionary()
                     usage_CARE = calculation['total_tiered_usage']
                     CARE = 1
                     total_revenue_requirement = total_revenue_requirement - calculation['total_basic_charge']
                 else:
+                    tiered_variable_charge_NONCARE = self.rate_schedule_dictionary[rate_schedule_name].get_tiered_variable_charge()[:]
                     rate_update_rules_dictionary_NONCARE = self.rate_schedule_dictionary[rate_schedule_name].get_rate_update_rules_dictionary()
                     usage_NONCARE = calculation['total_tiered_usage']
                     total_revenue_requirement = total_revenue_requirement - calculation['total_basic_charge']
@@ -490,15 +492,15 @@ class Utility(Agent):
                                 + ( usage_NONCARE[2] + usage_CARE[2] * rate_update_rules_dictionary_CARE['T3_CARE_discount'] + usage_CARE[3] * rate_update_rules_dictionary_CARE['T4_CARE_discount'] + usage_CARE[4] * rate_update_rules_dictionary_CARE['T5_CARE_discount'] ) * rate_update_rules_dictionary_NONCARE['T3_T1_ratio'] \
                                 + ( usage_NONCARE[3] ) * rate_update_rules_dictionary_NONCARE['T4_T1_ratio'] \
                                 + ( usage_NONCARE[4] ) * rate_update_rules_dictionary_NONCARE['T5_T1_ratio']
-            tiered_variable_charge_NONCARE = [0, 0, 0, 0, 0]
-            tiered_variable_charge_NONCARE[0] = total_revenue_requirement / units_of_T1_NONCARE
-            tiered_variable_charge_NONCARE[1] = tiered_variable_charge_NONCARE[0] * rate_update_rules_dictionary_NONCARE['T2_T1_ratio']
-            tiered_variable_charge_NONCARE[2] = tiered_variable_charge_NONCARE[0] * rate_update_rules_dictionary_NONCARE['T3_T1_ratio']
-            tiered_variable_charge_NONCARE[3] = tiered_variable_charge_NONCARE[0] * rate_update_rules_dictionary_NONCARE['T4_T1_ratio']
-            tiered_variable_charge_NONCARE[4] = tiered_variable_charge_NONCARE[0] * rate_update_rules_dictionary_NONCARE['T5_T1_ratio']
-            tiered_variable_charge_CARE = [0, 0, 0, 0, 0]
-            tiered_variable_charge_CARE[0] = tiered_variable_charge_NONCARE[0] * rate_update_rules_dictionary_NONCARE['T1_CARE_discount']
-            tiered_variable_charge_CARE[1] = tiered_variable_charge_NONCARE[1] * rate_update_rules_dictionary_NONCARE['T2_CARE_discount']
+            tiered_variable_charge_NONCARE = [tiered_variable_charge_NONCARE[0], tiered_variable_charge_NONCARE[1], 0, 0, 0]
+            tiered_variable_charge_NONCARE[0][year] = total_revenue_requirement / units_of_T1_NONCARE
+            tiered_variable_charge_NONCARE[1][year] = tiered_variable_charge_NONCARE[0][year] * rate_update_rules_dictionary_NONCARE['T2_T1_ratio']
+            tiered_variable_charge_NONCARE[2] = tiered_variable_charge_NONCARE[0][year] * rate_update_rules_dictionary_NONCARE['T3_T1_ratio']
+            tiered_variable_charge_NONCARE[3] = tiered_variable_charge_NONCARE[0][year] * rate_update_rules_dictionary_NONCARE['T4_T1_ratio']
+            tiered_variable_charge_NONCARE[4] = tiered_variable_charge_NONCARE[0][year] * rate_update_rules_dictionary_NONCARE['T5_T1_ratio']
+            tiered_variable_charge_CARE = [tiered_variable_charge_CARE[0], tiered_variable_charge_CARE[1], 0, 0, 0]
+            tiered_variable_charge_CARE[0][year] = tiered_variable_charge_NONCARE[0][year] * rate_update_rules_dictionary_NONCARE['T1_CARE_discount']
+            tiered_variable_charge_CARE[1][year] = tiered_variable_charge_NONCARE[1][year] * rate_update_rules_dictionary_NONCARE['T2_CARE_discount']
             tiered_variable_charge_CARE[2] = tiered_variable_charge_NONCARE[2] * rate_update_rules_dictionary_NONCARE['T3_CARE_discount']
             tiered_variable_charge_CARE[3] = tiered_variable_charge_NONCARE[2] * rate_update_rules_dictionary_NONCARE['T4_CARE_discount']
             tiered_variable_charge_CARE[4] = tiered_variable_charge_NONCARE[2] * rate_update_rules_dictionary_NONCARE['T5_CARE_discount']            
@@ -508,42 +510,66 @@ class Utility(Agent):
                 for rate_schedule_name, calculation in rate_schedule_calculations.iteritems():
                     if self.rate_schedule_dictionary[rate_schedule_name].is_CARE():
                         rate_update_rules_dictionary_CARE = self.rate_schedule_dictionary[rate_schedule_name].get_rate_update_rules_dictionary()
+                        tiered_variable_charge_CARE = self.rate_schedule_dictionary[rate_schedule_name].get_tiered_variable_charge()[:]
                         usage_CARE = calculation['total_tiered_usage']
                         CARE = 1
                         total_revenue_requirement = total_revenue_requirement - calculation['total_basic_charge']
                     else:
                         rate_update_rules_dictionary_NONCARE = self.rate_schedule_dictionary[rate_schedule_name].get_rate_update_rules_dictionary()
+                        tiered_variable_charge_NONCARE = self.rate_schedule_dictionary[rate_schedule_name].get_tiered_variable_charge()[:]
                         usage_NONCARE = calculation['total_tiered_usage']
                         total_revenue_requirement = total_revenue_requirement - calculation['total_basic_charge']
                 if CARE == 0:
                     usage_CARE = [0, 0, 0, 0, 0]
-                units_of_NONCARE = usage_NONCARE[0] + usage_CARE[0] * rate_update_rules_dictionary_CARE['T1_CARE_discount']
-                tiered_variable_charge_NONCARE = [total_revenue_requirement / units_of_NONCARE] * 5
-                tiered_variable_charge_CARE = [tiered_variable_charge_NONCARE * rate_update_rules_dictionary_CARE['T1_CARE_discount']] * 5            
+                    tiered_variable_charge_CARE = [tiered_variable_charge_CARE[0], 0, 0, 0, 0]
+                units_of_T1_NONCARE = usage_CARE[0] * rate_update_rules_dictionary_CARE['T1_CARE_discount'] \
+                                      + usage_CARE[1] * rate_update_rules_dictionary_CARE['T1_CARE_discount'] \
+                                      + usage_CARE[2] * rate_update_rules_dictionary_CARE['T1_CARE_discount'] \
+                                      + usage_CARE[3] * rate_update_rules_dictionary_CARE['T1_CARE_discount'] \
+                                      + usage_CARE[4] * rate_update_rules_dictionary_CARE['T1_CARE_discount'] \
+                                      + usage_NONCARE[0] \
+                                      + usage_NONCARE[1] \
+                                      + usage_NONCARE[2] \
+                                      + usage_NONCARE[3] \
+                                      + usage_NONCARE[4]
+                tiered_variable_charge_NONCARE[0][year::] = [total_revenue_requirement / units_of_T1_NONCARE] * len(tiered_variable_charge_NONCARE[0][year::])
+                tiered_variable_charge_NONCARE[1][year::] = [total_revenue_requirement / units_of_T1_NONCARE] * len(tiered_variable_charge_NONCARE[1][year::])
+                tiered_variable_charge_NONCARE[2::] = [total_revenue_requirement / units_of_T1_NONCARE] * 3
+                
+                tiered_variable_charge_CARE[0][year::] = [tiered_variable_charge_NONCARE[0][year] * rate_update_rules_dictionary_CARE['T1_CARE_discount']] * len(tiered_variable_charge_CARE[0][year::])
+                tiered_variable_charge_CARE[1][year::] = [tiered_variable_charge_NONCARE[0][year] * rate_update_rules_dictionary_CARE['T1_CARE_discount']] * len(tiered_variable_charge_CARE[0][year::])
+                tiered_variable_charge_CARE[2::] = [tiered_variable_charge_NONCARE[0][year]* rate_update_rules_dictionary_CARE['T1_CARE_discount']] * 3          
             elif number_of_tiers == 2:
                 CARE = 0
                 for rate_schedule_name, calculation in rate_schedule_calculations.iteritems():
                     if self.rate_schedule_dictionary[rate_schedule_name].is_CARE():
                         rate_update_rules_dictionary_CARE = self.rate_schedule_dictionary[rate_schedule_name].get_rate_update_rules_dictionary()
                         tiered_variable_charge_CARE = self.rate_schedule_dictionary[rate_schedule_name].get_tiered_variable_charge()[:]
-#                         tiered_variable_charge_CARE[0] = tiered_variable_charge_CARE[0] * rate_update_rules_dictionary_CARE['T1_increase'] 
                         usage_CARE = calculation['total_tiered_usage']
-                        total_revenue_requirement = total_revenue_requirement - tiered_variable_charge_CARE[0] * calculation['total_tiered_usage'][0]            
+                        total_revenue_requirement = total_revenue_requirement - tiered_variable_charge_CARE[0][year] * calculation['total_tiered_usage'][0]            
                         CARE = 1
                         total_revenue_requirement = total_revenue_requirement - calculation['total_basic_charge']
                     else:
                         rate_update_rules_dictionary_NONCARE = self.rate_schedule_dictionary[rate_schedule_name].get_rate_update_rules_dictionary()
                         tiered_variable_charge_NONCARE = self.rate_schedule_dictionary[rate_schedule_name].get_tiered_variable_charge()[:]
-#                         tiered_variable_charge_NONCARE[0] = tiered_variable_charge_NONCARE[0] * rate_update_rules_dictionary_NONCARE['T1_increase'] 
                         usage_NONCARE = calculation['total_tiered_usage']
                         total_revenue_requirement = total_revenue_requirement - tiered_variable_charge_NONCARE[0][year] * calculation['total_tiered_usage'][0]            
                         total_revenue_requirement = total_revenue_requirement - calculation['total_basic_charge']
                 if CARE == 0:
                     usage_CARE = [0, 0, 0, 0, 0]
-                    tiered_variable_charge_CARE = [tiered_variable_charge_NONCARE[0][year], 0, 0, 0, 0]
-                units_of_T2_NONCARE = usage_NONCARE[1] + usage_CARE[1] * rate_update_rules_dictionary_CARE['T2_CARE_discount']
-                tiered_variable_charge_NONCARE[1::] = [total_revenue_requirement / units_of_T2_NONCARE] * 4
-                tiered_variable_charge_CARE[1::] = [tiered_variable_charge_NONCARE * rate_update_rules_dictionary_CARE['T2_CARE_discount']] * 4
+                    tiered_variable_charge_CARE = [tiered_variable_charge_NONCARE[0], 0, 0, 0, 0]
+                units_of_T2_NONCARE = usage_CARE[1] * rate_update_rules_dictionary_CARE['T2_CARE_discount'] \
+                                      + usage_CARE[2] * rate_update_rules_dictionary_CARE['T2_CARE_discount'] \
+                                      + usage_CARE[3] * rate_update_rules_dictionary_CARE['T2_CARE_discount'] \
+                                      + usage_CARE[4] * rate_update_rules_dictionary_CARE['T2_CARE_discount'] \
+                                      + usage_NONCARE[1] \
+                                      + usage_NONCARE[2] \
+                                      + usage_NONCARE[3] \
+                                      + usage_NONCARE[4]
+                tiered_variable_charge_NONCARE[1][year::] = [total_revenue_requirement / units_of_T2_NONCARE] * len(tiered_variable_charge_NONCARE[1][year::])
+                tiered_variable_charge_NONCARE[2::] = [total_revenue_requirement / units_of_T2_NONCARE] * 3
+                tiered_variable_charge_CARE[1][year::] = [tiered_variable_charge_NONCARE[1][year] * rate_update_rules_dictionary_CARE['T2_CARE_discount']] * len(tiered_variable_charge_CARE[1][year::])
+                tiered_variable_charge_CARE[2::] = [tiered_variable_charge_NONCARE[1][year]* rate_update_rules_dictionary_CARE['T2_CARE_discount']] * 3
             else:            
                 CARE = 0
                 tiered_variable_charge_CARE = []
@@ -553,8 +579,6 @@ class Utility(Agent):
                     if self.rate_schedule_dictionary[rate_schedule_name].is_CARE():
                         rate_update_rules_dictionary_CARE = self.rate_schedule_dictionary[rate_schedule_name].get_rate_update_rules_dictionary()
                         tiered_variable_charge_CARE = self.rate_schedule_dictionary[rate_schedule_name].get_tiered_variable_charge()[:]
-#                         tiered_variable_charge_CARE[0] = tiered_variable_charge_CARE[0] * rate_update_rules_dictionary_CARE['T1_increase'] 
-#                         tiered_variable_charge_CARE[1] = tiered_variable_charge_CARE[1] * rate_update_rules_dictionary_CARE['T2_increase'] 
                         usage_CARE = calculation['total_tiered_usage']
                         
                         total_revenue_requirement = total_revenue_requirement - tiered_variable_charge_CARE[0][year] * calculation['total_tiered_usage'][0] - tiered_variable_charge_CARE[1][year] * calculation['total_tiered_usage'][1]                
@@ -563,8 +587,6 @@ class Utility(Agent):
                     else:
                         rate_update_rules_dictionary_NONCARE = self.rate_schedule_dictionary[rate_schedule_name].get_rate_update_rules_dictionary()
                         tiered_variable_charge_NONCARE = self.rate_schedule_dictionary[rate_schedule_name].get_tiered_variable_charge()[:]
-#                         tiered_variable_charge_NONCARE[0] = tiered_variable_charge_NONCARE[0] * rate_update_rules_dictionary_NONCARE['T1_increase']
-#                         tiered_variable_charge_NONCARE[1] = tiered_variable_charge_NONCARE[1] * rate_update_rules_dictionary_NONCARE['T2_increase']
                         usage_NONCARE = calculation['total_tiered_usage']
                         total_revenue_requirement = total_revenue_requirement - tiered_variable_charge_NONCARE[0][year] * calculation['total_tiered_usage'][0] - tiered_variable_charge_NONCARE[1][year] * calculation['total_tiered_usage'][1]                                
                         total_revenue_requirement = total_revenue_requirement - calculation['total_basic_charge']
@@ -585,12 +607,12 @@ class Utility(Agent):
                 tiered_variable_charge_CARE[2] = tiered_variable_charge_NONCARE[2] * rate_update_rules_dictionary_CARE['T3_CARE_discount']
                 tiered_variable_charge_CARE[3] = tiered_variable_charge_NONCARE[2] * rate_update_rules_dictionary_CARE['T4_CARE_discount']
                 tiered_variable_charge_CARE[4] = tiered_variable_charge_NONCARE[2] * rate_update_rules_dictionary_CARE['T5_CARE_discount']
-
-            for rate_schedule_name, calculation in rate_schedule_calculations.iteritems():
-                if self.rate_schedule_dictionary[rate_schedule_name].is_CARE():
-                    self.rate_schedule_dictionary[rate_schedule_name].set_tiered_variable_charge(tiered_variable_charge_CARE)
-                else:
-                    self.rate_schedule_dictionary[rate_schedule_name].set_tiered_variable_charge(tiered_variable_charge_NONCARE)
+            
+        for rate_schedule_name, calculation in rate_schedule_calculations.iteritems():
+            if self.rate_schedule_dictionary[rate_schedule_name].is_CARE():
+                self.rate_schedule_dictionary[rate_schedule_name].set_tiered_variable_charge(tiered_variable_charge_CARE)
+            else:
+                self.rate_schedule_dictionary[rate_schedule_name].set_tiered_variable_charge(tiered_variable_charge_NONCARE)
             
     def _update_baseline_allocations(self, current_month, reference_start_month, reference_number_of_months):
         for baseline_region in self.baseline_region_dictionary.values():

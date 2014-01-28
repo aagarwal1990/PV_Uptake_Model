@@ -240,6 +240,7 @@ class TierNetMeterRateSchedule(RateSchedule):
     def __init__(self, name, rate_component_dictionary, rate_update_rules_dictionary):
         super(TierNetMeterRateSchedule,self).__init__(name, rate_component_dictionary, rate_update_rules_dictionary)
         self.history_of_calculations = dict()
+        self.is_two_tiers = 0
     
     @classmethod
     def parse_yaml(cls, specs):
@@ -288,7 +289,7 @@ class TierNetMeterRateSchedule(RateSchedule):
     def generate_utility_bill(self, customer_name, load_profile, baseline_allocation, first_month_of_billing_period, month_of_billing_period, bill_for_previous_month = None):
         # Find year of rate revision
         index_of_start_time = sce_settings.FIRST_INDEX_OF_MONTH[month_of_billing_period]
-        year = int(math.floor(float(first_month_of_billing_period) / 12)) 
+        year = int(math.floor(float(first_month_of_billing_period - 1) / 12)) 
         index_of_end_time = sce_settings.FIRST_INDEX_OF_MONTH[month_of_billing_period + 1]
         baseline_allocation_for_whole_month = baseline_allocation.get_integral_over_time_index(index_of_start_time, index_of_end_time)
         usage = load_profile.get_integral_over_time_index(index_of_start_time, index_of_end_time)
@@ -306,6 +307,7 @@ class TierNetMeterRateSchedule(RateSchedule):
                                   self.rate_component_dictionary['T3_rate'],
                                   self.rate_component_dictionary['T4_rate'],
                                   self.rate_component_dictionary['T5_rate']]
+                                      
         net_surplus_compensation_rate = self.rate_component_dictionary['net_surplus_compensation_rate']                
         units_of_basic_charge = sce_settings.NUMBER_OF_DAYS_IN_EACH_MONTH[month_of_billing_period % 12]
         sign_of_usage = sce_settings.sign(usage)
