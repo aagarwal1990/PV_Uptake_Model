@@ -188,6 +188,7 @@ for utility_col in range(1, utility_costs.ncols):
     utility_revenue_req = float(utility_costs.cell_value(8, utility_col))
     utility_total_system_delivery_costs.append(utility_revenue_req)
 utility_costs_dct['total_system_delivery_costs'] = utility_total_system_delivery_costs
+utility_costs_dct['years_between_rate_revisions'] = int(tariff_structures.cell_value(7, 5))
 
 # initialize technology installer dictionary    
 tech_installer_parameter_dictionary = {}
@@ -410,7 +411,7 @@ util_parameter_dictionary = {}
 util_parameter_dictionary['baseline_as_percentage_of_aggregate_usage'] = tariff_structure_dct['summer_and_winter_baseline']
 util_parameter_dictionary['delivery_revenue_requirement_per_year'] = utility_costs_dct['total_system_delivery_costs']
 util_parameter_dictionary['generation_revenue_requirement_per_kwh'] = utility_costs_dct['generation_marginal_energy_cost_summer_mid_peak']
-
+util_parameter_dictionary['years_between_rate_revisions'] = utility_costs_dct['years_between_rate_revisions']
 util_specs = {}
 util_specs['type'] = 'Utility'
 util_specs['name'] = 'utility'

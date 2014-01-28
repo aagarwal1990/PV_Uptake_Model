@@ -447,7 +447,8 @@ class Utility(Agent):
             self.customer_category_account_dictionary[customer_category_agent_name].add_load_profile(dictionary_of_load_profile_in_current_step, index_of_start_time_of_current_step)
         # every three years, update rate schedules and baseline allocations
         month_of_current_step = index_of_start_time_of_current_step
-        if ( month_of_current_step % 12 ) == 0 and month_of_current_step >= 12:
+        year_multiplier = self.parameter_dictionary['years_between_rate_revisions']
+        if ( month_of_current_step % 12 * year_multiplier) == 0 and month_of_current_step >= 12 * year_multiplier:
             self._update_rate_schedules(month_of_current_step, month_of_current_step - 12, 12)
             self._update_baseline_allocations(month_of_current_step, month_of_current_step - 12, 12)
         # update all rate schedules
