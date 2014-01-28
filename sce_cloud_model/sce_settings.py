@@ -19,8 +19,6 @@ import bisect
 dict_customer_log = {}
 dict_utility_log = {}
 
-print 
-
 """ The following constants are for converting between units of time """
 NUMBER_OF_MONTHS_IN_ONE_YEAR = 12
 NUMBER_OF_DAYS_IN_ONE_YEAR = 365

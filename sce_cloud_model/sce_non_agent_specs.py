@@ -18,6 +18,7 @@ import copy
 import logging
 import logging.config
 import yaml
+import math
 
 class Trace(object):
     """
@@ -184,7 +185,7 @@ class RateSchedule(object):
     def get_rate_update_rules_dictionary(self):
         return self.rate_update_rules_dictionary
     
-    def generate_utility_bill(self, customer_name, load_profile, baseline_region, month_of_billing_period, bill_for_previous_month):
+    def generate_utility_bill(self, customer_name, load_profile, baseline_region, first_month_of_billing_period, month_of_billing_period, bill_for_previous_month):
         raise Exception('Class derived from RateSchedule must implement generate_utility_bill()')
     
     def calculate_total_charge_over_year(self, load_profile, baseline_region):
@@ -284,8 +285,10 @@ class TierNetMeterRateSchedule(RateSchedule):
     def get_net_surplus_compensation_rate(self):
         return self.rate_component_dictionary['net_surplus_compensation_rate']
     
-    def generate_utility_bill(self, customer_name, load_profile, baseline_allocation, month_of_billing_period, bill_for_previous_month = None):
+    def generate_utility_bill(self, customer_name, load_profile, baseline_allocation, first_month_of_billing_period, month_of_billing_period, bill_for_previous_month = None):
+        # Find year of rate revision
         index_of_start_time = sce_settings.FIRST_INDEX_OF_MONTH[month_of_billing_period]
+        year = int(math.floor(float(first_month_of_billing_period) / 12)) 
         index_of_end_time = sce_settings.FIRST_INDEX_OF_MONTH[month_of_billing_period + 1]
         baseline_allocation_for_whole_month = baseline_allocation.get_integral_over_time_index(index_of_start_time, index_of_end_time)
         usage = load_profile.get_integral_over_time_index(index_of_start_time, index_of_end_time)
@@ -298,8 +301,8 @@ class TierNetMeterRateSchedule(RateSchedule):
                 basic_charge = self.rate_component_dictionary['customer_charge_above_break_point']
         else:
             basic_charge = self.rate_component_dictionary['customer_charge']
-        tiered_variable_charge = [self.rate_component_dictionary['T1_rate'],
-                                  self.rate_component_dictionary['T2_rate'],
+        tiered_variable_charge = [self.rate_component_dictionary['T1_rate'][year],
+                                  self.rate_component_dictionary['T2_rate'][year],
                                   self.rate_component_dictionary['T3_rate'],
                                   self.rate_component_dictionary['T4_rate'],
                                   self.rate_component_dictionary['T5_rate']]
@@ -360,7 +363,7 @@ class TierNetMeterRateSchedule(RateSchedule):
     def calculate_monthly_charge(self, load_profile, baseline_allocation, first_month_of_billing_period, number_of_months, bill_for_previous_month = None):          
         monthly_charge = []
         for m in range(first_month_of_billing_period, first_month_of_billing_period + number_of_months):
-            bill_for_previous_month = self.generate_utility_bill('', load_profile, baseline_allocation, m, bill_for_previous_month)
+            bill_for_previous_month = self.generate_utility_bill('', load_profile, baseline_allocation, first_month_of_billing_period, m, bill_for_previous_month)
             monthly_charge.append(bill_for_previous_month.get_total_basic_charge() + bill_for_previous_month.get_total_tiered_variable_charge() - bill_for_previous_month.get_total_net_surplus_compensation())
         return monthly_charge
     
@@ -704,7 +707,7 @@ class CustomerCategoryAccount(object):
                     sce_settings.dict_utility_log[month_of_billing_period][customer_category_name][pv_tech].append(temp_dict)
 
     
-    def add_load_profile(self, new_dictionary_of_load_profile):
+    def add_load_profile(self, new_dictionary_of_load_profile, index_of_start_time_of_current_step):
         for pv_technology, value in new_dictionary_of_load_profile.iteritems():
             unprocessed_load_profile = value[0]
             number_of_customers = value[1]
@@ -712,7 +715,7 @@ class CustomerCategoryAccount(object):
             m2 = unprocessed_load_profile.get_end_month()
             bill = None if m1 == 0 else self.bill_history[m1-1][pv_technology][0]
             for month in range(m1,m2):
-                bill = self.current_rate_schedule.generate_utility_bill(self.customer_category_name, unprocessed_load_profile, self.baseline_region.get_baseline_allocation(), month, bill)
+                bill = self.current_rate_schedule.generate_utility_bill(self.customer_category_name, unprocessed_load_profile, self.baseline_region.get_baseline_allocation(), index_of_start_time_of_current_step, month, bill)
                 if month not in self.bill_history:
                     self.bill_history[month] = dict()
                 self.bill_history[month][pv_technology] = (bill, number_of_customers)

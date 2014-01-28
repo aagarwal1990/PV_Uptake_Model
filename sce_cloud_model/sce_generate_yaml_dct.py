@@ -157,16 +157,24 @@ tariff_structure_dct['T4_energy_CARE_discount'] = float(tariff_structures.cell_v
 tariff_structure_dct['T5_energy_CARE_discount'] = float(tariff_structures.cell_value(34, tariff_col))
 tariff_structure_dct['fixed_charge_CARE_discount'] = float(tariff_structures.cell_value(35, tariff_col))
 
-# Get Tier Rates
-tariff_col_2 = 5
-tariff_structure_dct['T1_rate'] = float(tariff_structures.cell_value(1, tariff_col_2))
-tariff_structure_dct['T2_rate'] = float(tariff_structures.cell_value(2, tariff_col_2))
-tariff_structure_dct['T3_rate'] = float(tariff_structures.cell_value(3, tariff_col_2))
-tariff_structure_dct['T4_rate'] = float(tariff_structures.cell_value(4, tariff_col_2))
-tariff_structure_dct['T5_rate'] = float(tariff_structures.cell_value(5, tariff_col_2))
-tariff_structure_dct['net_surplus_compensation_rate'] = float(tariff_structures.cell_value(6, tariff_col_2))
-
 """ Parse Utility Costs worksheet """
+# Get Tier Rates
+tariff_tier_1_rates = []
+tariff_tier_2_rates = []
+for utility_col_tier in range(1, utility_costs.ncols):
+    tier1_rate = float(utility_costs.cell_value(11,  utility_col_tier))
+    tier2_rate = float(utility_costs.cell_value(12,  utility_col_tier))
+    tariff_tier_1_rates.append(tier1_rate)
+    tariff_tier_2_rates.append(tier2_rate)
+tariff_structure_dct['T1_rate'] = tariff_tier_1_rates
+tariff_structure_dct['T2_rate'] = tariff_tier_2_rates
+
+utility_col_tier_rates = 1
+tariff_structure_dct['T3_rate'] = float(utility_costs.cell_value(13, utility_col_tier_rates))
+tariff_structure_dct['T4_rate'] = float(utility_costs.cell_value(14, utility_col_tier_rates))
+tariff_structure_dct['T5_rate'] = float(utility_costs.cell_value(15, utility_col_tier_rates))
+tariff_structure_dct['net_surplus_compensation_rate'] = float(utility_costs.cell_value(16, utility_col_tier_rates))
+
 utility_costs_dct = {}
 utility_col = 1
 utility_costs_dct['generation_marginal_energy_cost_summer_on_peak'] = float(utility_costs.cell_value(0, utility_col))
@@ -356,8 +364,8 @@ rate_component_dictionary['T2_usage_baseline'] = tariff_structure_dct['T2/Baseli
 rate_component_dictionary['T3_usage_baseline'] = tariff_structure_dct['T3/Baseline']
 rate_component_dictionary['T4_usage_baseline'] = tariff_structure_dct['T4/Baseline']
 rate_component_dictionary['T5_usage_baseline'] = tariff_structure_dct['T5/Baseline']
-rate_component_dictionary['T1_rate'] = tariff_structure_dct['T1_rate'] * (1 - tariff_structure_dct['T1_energy_CARE_discount'])
-rate_component_dictionary['T2_rate'] = tariff_structure_dct['T2_rate'] * (1 - tariff_structure_dct['T2_energy_CARE_discount'])
+rate_component_dictionary['T1_rate'] = [(x * (1 - tariff_structure_dct['T1_energy_CARE_discount'])) for x in tariff_structure_dct['T1_rate']]
+rate_component_dictionary['T2_rate'] = [(x * (1 - tariff_structure_dct['T2_energy_CARE_discount'])) for x in tariff_structure_dct['T2_rate']]
 rate_component_dictionary['T3_rate'] = tariff_structure_dct['T3_rate'] * (1 - tariff_structure_dct['T3_energy_CARE_discount'])
 rate_component_dictionary['T4_rate'] = tariff_structure_dct['T3_rate'] * (1 - tariff_structure_dct['T4_energy_CARE_discount'])
 rate_component_dictionary['T5_rate'] = tariff_structure_dct['T3_rate'] * (1 - tariff_structure_dct['T5_energy_CARE_discount'])
