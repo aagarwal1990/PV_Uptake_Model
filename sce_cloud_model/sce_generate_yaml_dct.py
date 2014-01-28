@@ -449,9 +449,11 @@ for consumption_category, customer_count in customer_categories_dct.iteritems():
     cust_parameter_dictionary['adoption_parameter_p_bin_3']  = adoption_model_dct['model_type_p_bin_3']
     cust_parameter_dictionary['adoption_parameter_q_bin_3']  = adoption_model_dct['model_type_q_bin_3']
     cust_parameter_dictionary['name_of_baseline_region'] = 'Zone 1'
-    cust_parameter_dictionary['initial_adopters'] = adoption_model_dct['initial_adopters']
+    cust_parameter_dictionary['initial_category_adopters'] = solar_customer_categories_dct[consumption_category]
+    cust_parameter_dictionary['initial_total_adopters'] = adoption_model_dct['initial_adopters']
     cust_parameter_dictionary['total_population'] = adoption_model_dct['total_population']
-    cust_parameter_dictionary['shading_assumption'] = adoption_model_dct['shading_assumption']     
+    cust_parameter_dictionary['shading_assumption'] = adoption_model_dct['shading_assumption']
+    cust_parameter_dictionary['consumptionBin_systemSize'] = consumptionBin_systemSize     
     cust_specs = {}
     cust_specs['type'] = 'ResidentialCustomerCategory'
     cust_specs['parameter_dictionary'] = cust_parameter_dictionary

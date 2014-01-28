@@ -105,11 +105,18 @@ class ResidentialCustomerCategory(Agent):
     def __init__(self, name, simulator, parameter_dictionary):
         super(ResidentialCustomerCategory,self).__init__(name, simulator, parameter_dictionary)    
         number_of_customers = 0
-        pv_technology_options = parameter_dictionary['pv_dictionary']
+        pv_technology_options = self.parameter_dictionary['pv_dictionary']
         self.parameter_dictionary['pv_dictionary'] = dict()
         self.parameter_dictionary['pv_dictionary'][None] = self.parameter_dictionary['number_of_customers']
+        
+        category_bin = int(float(self.get_middle_text(name, 'Consumption:Bin', '<')))
+        relevant_pv_tech = self.parameter_dictionary['consumptionBin_systemSize'][category_bin]
         for pv_technology in pv_technology_options.keys():
-            self.parameter_dictionary['pv_dictionary'][pv_technology] = 0
+            if int(pv_technology.get_quantity()) == relevant_pv_tech:
+                self.parameter_dictionary['pv_dictionary'][pv_technology] = self.parameter_dictionary['initial_category_adopters']
+            else:
+                self.parameter_dictionary['pv_dictionary'][pv_technology] = 0
+                
         # create read variables
         self.create_read_variable('index_of_start_time_of_current_step')
         self.create_read_variable('index_of_end_time_of_current_step')
@@ -122,8 +129,8 @@ class ResidentialCustomerCategory(Agent):
         
         # create write variables
         self.create_write_variable('dictionary_of_load_profile_in_current_step', None)
-        self.create_write_variable('number_of_customers_with_pv', 0)
-        self.create_write_variable('number_of_customers_in_market_for_pv', 0)
+        self.create_write_variable('number_of_customers_with_pv', self.parameter_dictionary['initial_category_adopters'])
+        self.create_write_variable('number_of_customers_in_market_for_pv', self.parameter_dictionary['initial_category_adopters'])
         
         # initialize write variables
         index_of_start_time_of_current_step = 0
@@ -138,6 +145,10 @@ class ResidentialCustomerCategory(Agent):
             net_load_profile = consumption_profile - reduction_in_load_profile
             dictionary_of_load_profile_in_current_step[pv_technology] = (net_load_profile, number_of_customers)
         self.write('dictionary_of_load_profile_in_current_step', dictionary_of_load_profile_in_current_step)
+    
+    def get_middle_text(self, line, string_start, string_end):
+        temp = line.split(string_start)[1]
+        return temp.split(string_end)[0]
          
     @classmethod
     def parse_yaml(cls, specs, simulator, consumption_profile_dictionary, solar_intensity_profile_dictionary, pv_installer_dictionary, pv_dictionary):
@@ -160,9 +171,11 @@ class ResidentialCustomerCategory(Agent):
                                          'adoption_parameter_p_bin_3': specs['parameter_dictionary']['adoption_parameter_p_bin_3'], 
                                          'adoption_parameter_q_bin_3': specs['parameter_dictionary']['adoption_parameter_q_bin_3'],  
                                          'name_of_baseline_region': specs['parameter_dictionary']['name_of_baseline_region'],
-                                         'initial_adopters': specs['parameter_dictionary']['initial_adopters'],
+                                         'initial_category_adopters': specs['parameter_dictionary']['initial_category_adopters'],
+                                         'initial_total_adopters': specs['parameter_dictionary']['initial_total_adopters'],
                                          'total_population': specs['parameter_dictionary']['total_population'],
-                                         'shading_assumption': specs['parameter_dictionary']['shading_assumption']})
+                                         'shading_assumption': specs['parameter_dictionary']['shading_assumption'],
+                                         'consumptionBin_systemSize': specs['parameter_dictionary']['consumptionBin_systemSize']})
                                          
     def get_customer_category_name(self):
         return self.parameter_dictionary['customer_category_name']
@@ -309,19 +322,19 @@ class ResidentialCustomerCategory(Agent):
                     P_fit = self.parameter_dictionary['adoption_parameter_pClassic']
                     Q_fit = self.parameter_dictionary['adoption_parameter_qClassic']
                     B_fit = self.parameter_dictionary['adoption_parameter_bClassic']
-                    initial_adopters = self.parameter_dictionary['initial_adopters']
+                    initial_adopters = self.parameter_dictionary['initial_total_adopters']
                     total_population = self.parameter_dictionary['total_population']
 
                     if self.parameter_dictionary['model_type'].lower() == 'Classic Bass Model With Savings'.lower():
                         savingsBin = self.get_savings_bin(savings)
                         P_fit, Q_fit = self.get_P_Q_vals(savingsBin)
-                        probability = (P_fit + (Q_fit) * (float(current_number_of_adopters + initial_adopters) / (total_population * 0.3)))
+                        probability = (P_fit + (Q_fit) * (float(current_number_of_adopters) / (total_population * 0.3)))
                         
                     if self.parameter_dictionary['model_type'].lower() == 'Classic Bass Model'.lower():
-                        probability = (P_fit + (Q_fit) * (float(current_number_of_adopters + initial_adopters) / (total_population * 0.3)))
+                        probability = (P_fit + (Q_fit) * (float(current_number_of_adopters) / (total_population * 0.3)))
                     
                     if self.parameter_dictionary['model_type'].lower() == 'Bass Model With Savings'.lower():
-                        probability = (P_fit + (Q_fit) * (float(current_number_of_adopters + initial_adopters) / (total_population * 0.3))) * ((B_fit * savings) / math.sqrt(1 + math.pow(B_fit * savings, 2)))   
+                        probability = (P_fit + (Q_fit) * (float(current_number_of_adopters) / (total_population * 0.3))) * ((B_fit * savings) / math.sqrt(1 + math.pow(B_fit * savings, 2)))   
                     
                     number_of_adopters = round(probability * self.parameter_dictionary['pv_dictionary'][None])
                     current_pv_adopters = 0
@@ -331,7 +344,7 @@ class ResidentialCustomerCategory(Agent):
                     
                     number_of_eligible_customers = self.get_number_of_customers() * self.parameter_dictionary['shading_assumption']       
                     if current_pv_adopters + number_of_adopters > number_of_eligible_customers:
-                            number_of_adopters = number_of_eligible_customers - current_pv_adopters
+                            number_of_adopters = max(number_of_eligible_customers - current_pv_adopters, 0)
                         
                     self.parameter_dictionary['pv_dictionary'][technology] += number_of_adopters
                     self.parameter_dictionary['pv_dictionary'][None] -= number_of_adopters
